@@ -14,6 +14,14 @@ import "strconv"
 // and reply for an RPC.
 //
 
+type Request struct {
+}
+
+type Reply struct {
+	NReduce int
+	Job     Job
+}
+
 type ExampleArgs struct {
 	X int
 }
@@ -23,7 +31,6 @@ type ExampleReply struct {
 }
 
 // Add your RPC definitions here.
-
 
 // Cook up a unique-ish UNIX-domain socket name
 // in /var/tmp, for the coordinator.
