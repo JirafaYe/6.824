@@ -1,9 +1,15 @@
 package mr
 
-import "fmt"
-import "log"
-import "net/rpc"
-import "hash/fnv"
+import (
+	"encoding/json"
+	"fmt"
+	"hash/fnv"
+	"io/ioutil"
+	"log"
+	"net/rpc"
+	"os"
+	"strconv"
+)
 
 //
 // Map functions return a slice of KeyValue.
@@ -26,9 +32,37 @@ func ihash(key string) int {
 //
 // main/mrworker.go calls this function.
 //
+
 func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
-	getJob()
+	reply := JobReply{}
+	getJob(&reply)
+
+	if reply.Job.IsMap && reply.Job.FileName != "" {
+		fmt.Println("执行map")
+
+		file, err := os.Open(reply.Job.FileName)
+		if err != nil {
+			log.Fatalf("cannot open %v", reply.Job.FileName)
+		}
+		content, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatalf("cannot read %v", reply.Job.FileName)
+		}
+		file.Close()
+
+		v := []KeyValue{}
+
+		kva := mapf(reply.Job.FileName, string(content))
+		v = append(v, kva...)
+
+		OutputTmpFile(v, &reply)
+
+		finishReply := &FinishResp{}
+		FinishJob(reply.Job.Id, finishReply)
+	} else if !reply.Job.IsMap && reply.Job.FileName != "" {
+
+	}
 
 	// Your worker implementation here.
 
@@ -37,13 +71,51 @@ func Worker(mapf func(string, string) []KeyValue,
 
 }
 
-func getJob() {
+func OutputTmpFile(v []KeyValue, reply *JobReply) {
+	tmp := make(map[int][]KeyValue, reply.Job.NReduce)
+
+	for _, v := range v {
+		tmpKey := ihash(v.Key) % reply.Job.NReduce
+		kv := tmp[tmpKey]
+		tmp[tmpKey] = append(kv, v)
+	}
+
+	filename := "./mr-tmp/mr-tmp-" + strconv.Itoa(reply.Job.Id)
+
+	for k, v := range tmp {
+		tmpFile := filename + "-" + strconv.Itoa(k) + ".txt"
+		ofile, _ := os.Create(tmpFile)
+
+		//写出中间文件
+		b, _ := json.Marshal(v)
+
+		ofile.Write(b)
+		ofile.Close()
+	}
+}
+func FinishJob(jobId int, reply *FinishResp) {
+	args := FinishRequest{
+		JobId:  jobId,
+		Status: true,
+	}
+
+	// fill in the argument(s).
+
+	// declare a reply structure.
+
+	// send the RPC request, wait for the reply.
+	call("Coordinator.FinishJob", &args, &reply)
+
+	// reply.Y should be 100.
+	fmt.Println("finishJob")
+}
+
+func getJob(reply *JobReply) {
 	args := Request{}
 
 	// fill in the argument(s).
 
 	// declare a reply structure.
-	reply := Reply{}
 
 	// send the RPC request, wait for the reply.
 	call("Coordinator.DistributeJob", &args, &reply)

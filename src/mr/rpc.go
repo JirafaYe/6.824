@@ -14,12 +14,20 @@ import "strconv"
 // and reply for an RPC.
 //
 
+type FinishRequest struct {
+	JobId  int
+	Status bool
+}
+
 type Request struct {
 }
 
-type Reply struct {
-	NReduce int
-	Job     Job
+type FinishResp struct {
+	IsAccepted bool
+}
+
+type JobReply struct {
+	Job Job
 }
 
 type ExampleArgs struct {
