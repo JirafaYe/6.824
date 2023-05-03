@@ -33,15 +33,16 @@ type Job struct {
 	FileName string
 	IsMap    bool
 	//Map任务为Nreduce，Reduce任务为Reduce任务号标识
-	NReduce int
-	Status  bool
+	NReduce   int
+	ReduceKey int
+	Status    bool
 }
 
 // Your code here -- RPC handlers for the worker to call.
 
 func (c *Coordinator) DistributeJob(args *Request, reply *JobReply) error {
 	mutex.Lock()
-	fmt.Println("读锁DistributeJob")
+	defer mutex.Unlock()
 
 	if c.IsMapStatus && len(c.MapChannel) != 0 {
 		reply.Job = *<-c.MapChannel
@@ -49,21 +50,16 @@ func (c *Coordinator) DistributeJob(args *Request, reply *JobReply) error {
 	} else if !c.IsMapStatus && len(c.ReduceChannel) != 0 {
 		reply.Job = *<-c.ReduceChannel
 	}
-	mutex.Unlock()
-	fmt.Println("释放读锁DistributeJob")
 
 	return nil
 }
 
 func (c *Coordinator) FinishJob(args *FinishRequest, reply *FinishResp) error {
 	mutex.Lock()
-	fmt.Println("锁finish")
+	defer mutex.Unlock()
 
 	c.JobManager[args.JobId].Job.Status = true
-	mutex.Unlock()
-	fmt.Println("释放锁finish")
 	reply.IsAccepted = true
-	fmt.Println("co finish")
 	return nil
 }
 
@@ -103,12 +99,11 @@ func (c *Coordinator) Done() bool {
 	ret := false
 	//判断是否已执行完map任务
 	finishMap := true
-	fmt.Println(len(c.MapChannel))
 	mutex.Lock()
 	defer mutex.Unlock()
-	fmt.Println("读锁Done")
+	fmt.Println("状态", c.IsMapStatus)
 	if c.IsMapStatus && len(c.MapChannel) == 0 {
-		fmt.Println("releas读锁Done")
+		fmt.Println("map状态")
 		for _, jobManager := range c.JobManager {
 			if jobManager.Job.IsMap && !jobManager.Job.Status {
 				finishMap = false
@@ -116,9 +111,8 @@ func (c *Coordinator) Done() bool {
 			}
 		}
 		if finishMap {
-			fmt.Println("map任务已完成")
-			c.IsMapStatus = !finishMap
 			fmt.Println("修改状态")
+			c.IsMapStatus = !finishMap
 			// c.MakeReduceJob()
 			fmt.Println("map任务已完成")
 		}
@@ -181,11 +175,12 @@ func (c *Coordinator) MakeReduceJob() {
 		fmt.Printf("%d\n", ReduceKey)
 		fmt.Println(c.NReduce)
 		job := &Job{
-			Id:       JobId,
-			FileName: "",
-			IsMap:    false,
-			Status:   false,
-			NReduce:  ReduceKey,
+			Id:        JobId,
+			FileName:  "",
+			IsMap:     false,
+			Status:    false,
+			NReduce:   c.NReduce,
+			ReduceKey: ReduceKey,
 		}
 		c.ReduceChannel <- job
 
