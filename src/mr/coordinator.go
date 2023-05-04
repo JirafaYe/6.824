@@ -6,12 +6,13 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
+	"strconv"
 	"sync"
 	"time"
 )
 
 var JobId int
-var mutex sync.RWMutex
+var mutex sync.Mutex
 
 type Coordinator struct {
 	// Your definitions here.
@@ -34,6 +35,7 @@ type Job struct {
 	IsMap    bool
 	//Map任务为Nreduce，Reduce任务为Reduce任务号标识
 	NReduce   int
+	FilesNum  int
 	ReduceKey int
 	Status    bool
 }
@@ -45,10 +47,17 @@ func (c *Coordinator) DistributeJob(args *Request, reply *JobReply) error {
 	defer mutex.Unlock()
 
 	if c.IsMapStatus && len(c.MapChannel) != 0 {
+		fmt.Println("mapJob======")
 		reply.Job = *<-c.MapChannel
 		c.JobManager[reply.Job.Id].StartTime = time.Now()
 	} else if !c.IsMapStatus && len(c.ReduceChannel) != 0 {
+		fmt.Println("ReduceJob======")
 		reply.Job = *<-c.ReduceChannel
+		c.JobManager[reply.Job.Id].StartTime = time.Now()
+	} else {
+		fmt.Print("elseJob======")
+		fmt.Println(c.IsMapStatus)
+		reply.Msg = "wait:isMap::" + strconv.FormatBool(c.IsMapStatus) + "::mapChann::" + strconv.Itoa(len(c.MapChannel)) + "::reduceChann" + strconv.Itoa(len(c.ReduceChannel)) + "::time::" + time.Now().String()
 	}
 
 	return nil
@@ -99,9 +108,17 @@ func (c *Coordinator) Done() bool {
 	ret := false
 	//判断是否已执行完map任务
 	finishMap := true
+	finishReduce := true
 	mutex.Lock()
 	defer mutex.Unlock()
 	fmt.Println("状态", c.IsMapStatus)
+	fmt.Println("::time::" + time.Now().String())
+	fmt.Println("检查任务状态")
+	c.CheckJobStatus()
+
+	// for _,jobM := range c.JobManager{
+	// 	if !jobM.Job.Status
+	// }
 	if c.IsMapStatus && len(c.MapChannel) == 0 {
 		fmt.Println("map状态")
 		for _, jobManager := range c.JobManager {
@@ -116,6 +133,19 @@ func (c *Coordinator) Done() bool {
 			// c.MakeReduceJob()
 			fmt.Println("map任务已完成")
 		}
+	} else if !c.IsMapStatus && len(c.ReduceChannel) == 0 {
+		fmt.Println("reduce状态")
+		for _, jobManager := range c.JobManager {
+			if !jobManager.Job.IsMap && !jobManager.Job.Status {
+				finishReduce = false
+				break
+			}
+		}
+		if finishReduce {
+			fmt.Println("完成reduce")
+			// c.MakeReduceJob()
+			ret = true
+		}
 	}
 	// mutex.RUnlock()
 	// fmt.Println("releas读锁Done")
@@ -123,6 +153,27 @@ func (c *Coordinator) Done() bool {
 	// Your code here.
 
 	return ret
+}
+
+func (c *Coordinator) CheckJobStatus() {
+	for _, v := range c.JobManager {
+		d := time.Now().Sub(v.StartTime)
+		if v.StartTime.IsZero() {
+			return
+		}
+		if !v.Job.Status && d >= time.Duration(60)*time.Second {
+			fmt.Println(v.StartTime)
+			fmt.Println("任务超时")
+			switch v.Job.IsMap {
+			case true:
+				c.MapChannel <- v.Job
+				v.StartTime = time.Time{}
+			case false:
+				c.ReduceChannel <- v.Job
+				v.StartTime = time.Time{}
+			}
+		}
+	}
 }
 
 //
@@ -181,6 +232,7 @@ func (c *Coordinator) MakeReduceJob() {
 			Status:    false,
 			NReduce:   c.NReduce,
 			ReduceKey: ReduceKey,
+			FilesNum:  len(c.Jobs),
 		}
 		c.ReduceChannel <- job
 

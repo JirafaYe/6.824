@@ -1,11 +1,11 @@
 package mr
 
 import (
-	"fmt"
+	"log"
 	"testing"
 )
 
 func TestJob(t *testing.T) {
-	i := ihash("10")
-	fmt.Print(i)
+	i := ihash("1a") % 10
+	log.Print(i)
 }

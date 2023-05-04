@@ -10,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"time"
 )
 
 //
@@ -37,12 +38,20 @@ func ihash(key string) int {
 func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
 	reply := JobReply{}
-	getJob(&reply)
 
-	if reply.Job.IsMap && reply.Job.FileName != "" {
-		MapJobWork(&reply, mapf)
-	} else if !reply.Job.IsMap && reply.Job.Id != 0 {
-		ReduceJobWork(&reply, reducef)
+	for i := 0; i < 20; i++ {
+		getJob(&reply)
+		if reply.Job.IsMap && reply.Job.FileName != "" {
+			MapJobWork(&reply, mapf)
+			break
+		} else if !reply.Job.IsMap && reply.Job.Id != 0 {
+			ReduceJobWork(&reply, reducef)
+			break
+		} else {
+			fmt.Println("loop=====", i)
+			fmt.Println(reply.Msg)
+		}
+		time.Sleep(5 * time.Second)
 	}
 
 	// Your worker implementation here.
@@ -54,10 +63,16 @@ func Worker(mapf func(string, string) []KeyValue,
 
 func ReduceJobWork(reply *JobReply, reducef func(string, []string) string) {
 	fmt.Println("Reduce任务")
-	kv := OpenIntermediaFiles(reply.Job.ReduceKey, reply.Job.NReduce)
+	kv := OpenIntermediaFiles(reply.Job.ReduceKey, reply.Job.FilesNum)
+	less := func(i, j int) bool {
+		return kv[i].Key > kv[j].Key
+	}
+
+	sort.Slice(kv, less)
 	i := 0
-	filename := "mr-out-" + strconv.Itoa(reply.Job.ReduceKey)
+	filename := "/root/workspace/6.824/src/main/mr-tmp/mr-out-" + strconv.Itoa(reply.Job.ReduceKey)
 	ofile, _ := os.Create(filename)
+	fmt.Println(len(kv))
 	for i < len(kv) {
 		j := i + 1
 		for j < len(kv) && kv[j].Key == kv[i].Key {
@@ -74,6 +89,8 @@ func ReduceJobWork(reply *JobReply, reducef func(string, []string) string) {
 
 		i = j
 	}
+	finishReply := &FinishResp{}
+	FinishJob(reply.Job.Id, finishReply)
 	fmt.Println("完成reduce")
 }
 
@@ -82,7 +99,7 @@ func MapJobWork(reply *JobReply, mapf func(string, string) []KeyValue) {
 
 	file, err := os.Open(reply.Job.FileName)
 	if err != nil {
-		log.Fatalf("cannot open %v", reply.Job.FileName)
+		log.Fatalf("cannot open %v", file.Name())
 	}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -95,12 +112,6 @@ func MapJobWork(reply *JobReply, mapf func(string, string) []KeyValue) {
 	kva := mapf(reply.Job.FileName, string(content))
 	v = append(v, kva...)
 
-	less := func(i, j int) bool {
-		return v[i].Key > v[j].Key
-	}
-
-	sort.Slice(v, less)
-
 	OutputTmpFile(v, reply)
 
 	finishReply := &FinishResp{}
@@ -108,30 +119,40 @@ func MapJobWork(reply *JobReply, mapf func(string, string) []KeyValue) {
 }
 
 func OpenIntermediaFiles(reduceKey int, nReduce int) []KeyValue {
-	filename := "./mr-tmp/mr-tmp-"
+	filename := "/root/workspace/6.824/src/main/mr-tmp/mr-tmp-"
 	res := []KeyValue{}
 	reduce := strconv.Itoa(reduceKey)
 	for i := 0; i < nReduce; i++ {
 		tmp := []KeyValue{}
 		tmpName := filename + strconv.Itoa(i) + "-" + reduce + ".txt"
 		fmt.Println("name" + tmpName)
-		rFile, _ := os.ReadFile(tmpName)
-		json.Unmarshal(rFile, &tmp)
+		file, err := os.Open(tmpName)
+		if err != nil {
+			log.Println("cannot open %v", file.Name())
+			continue
+		}
+		content, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Println("cannot read %v", tmpName)
+		}
+		file.Close()
+		json.Unmarshal(content, &tmp)
+		fmt.Println("byte[]:", +len(content))
 		res = append(res, tmp...)
 	}
 	return res
 }
 
-func OutputTmpFile(v []KeyValue, reply *JobReply) {
+func OutputTmpFile(kvs []KeyValue, reply *JobReply) {
 	tmp := make(map[int][]KeyValue, reply.Job.NReduce)
 
-	for _, v := range v {
+	for _, v := range kvs {
 		tmpKey := ihash(v.Key) % reply.Job.NReduce
-		kv := tmp[tmpKey]
-		tmp[tmpKey] = append(kv, v)
+		// kv := tmp[tmpKey]
+		tmp[tmpKey] = append(tmp[tmpKey], v)
 	}
 
-	filename := "./mr-tmp/mr-tmp-" + strconv.Itoa(reply.Job.Id)
+	filename := "/root/workspace/6.824/src/main/mr-tmp/mr-tmp-" + strconv.Itoa(reply.Job.Id)
 
 	for k, v := range tmp {
 		tmpFile := filename + "-" + strconv.Itoa(k) + ".txt"

@@ -28,6 +28,7 @@ type FinishResp struct {
 
 type JobReply struct {
 	Job Job
+	Msg string
 }
 
 type ExampleArgs struct {

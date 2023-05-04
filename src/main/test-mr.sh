@@ -50,6 +50,27 @@ sleep 1
 timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
 timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
 timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/wc.so 
 
 # wait for the coordinator to exit.
 wait $pid
@@ -85,7 +106,37 @@ sleep 1
 
 # start multiple workers
 timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
-timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so &
+timeout -k 2s 180s ../mrworker ../../mrapps/indexer.so 
 
 sort mr-out* | grep . > mr-indexer-all
 if cmp mr-indexer-all mr-correct-indexer.txt
