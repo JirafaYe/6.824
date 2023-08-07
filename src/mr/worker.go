@@ -37,21 +37,25 @@ func ihash(key string) int {
 
 func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
-	reply := JobReply{}
 
-	for i := 0; i < 20; i++ {
+	for {
+		reply := JobReply{}
 		getJob(&reply)
+		// fmt.Println("rply", reply)
+		if reply.IsDone {
+			return
+		}
 		if reply.Job.IsMap && reply.Job.FileName != "" {
 			MapJobWork(&reply, mapf)
-			break
+			// break
 		} else if !reply.Job.IsMap && reply.Job.Id != 0 {
 			ReduceJobWork(&reply, reducef)
-			break
+			// break
 		} else {
-			fmt.Println("loop=====", i)
+			// fmt.Println("loop=====", i)
 			fmt.Println(reply.Msg)
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 
 	// Your worker implementation here.
@@ -62,7 +66,7 @@ func Worker(mapf func(string, string) []KeyValue,
 }
 
 func ReduceJobWork(reply *JobReply, reducef func(string, []string) string) {
-	fmt.Println("Reduce任务")
+	// fmt.Println("Reduce任务")
 	kv := OpenIntermediaFiles(reply.Job.ReduceKey, reply.Job.FilesNum)
 	less := func(i, j int) bool {
 		return kv[i].Key > kv[j].Key
@@ -72,7 +76,7 @@ func ReduceJobWork(reply *JobReply, reducef func(string, []string) string) {
 	i := 0
 	filename := "/root/workspace/6.824/src/main/mr-tmp/mr-out-" + strconv.Itoa(reply.Job.ReduceKey)
 	ofile, _ := os.Create(filename)
-	fmt.Println(len(kv))
+	// fmt.Println(len(kv))
 	for i < len(kv) {
 		j := i + 1
 		for j < len(kv) && kv[j].Key == kv[i].Key {
@@ -91,11 +95,11 @@ func ReduceJobWork(reply *JobReply, reducef func(string, []string) string) {
 	}
 	finishReply := &FinishResp{}
 	FinishJob(reply.Job.Id, finishReply)
-	fmt.Println("完成reduce")
+	// fmt.Println("完成reduce")
 }
 
 func MapJobWork(reply *JobReply, mapf func(string, string) []KeyValue) {
-	fmt.Println("执行map")
+	// fmt.Println("执行map")
 
 	file, err := os.Open(reply.Job.FileName)
 	if err != nil {
@@ -125,10 +129,10 @@ func OpenIntermediaFiles(reduceKey int, nReduce int) []KeyValue {
 	for i := 0; i < nReduce; i++ {
 		tmp := []KeyValue{}
 		tmpName := filename + strconv.Itoa(i) + "-" + reduce + ".txt"
-		fmt.Println("name" + tmpName)
+		// fmt.Println("name" + tmpName)
 		file, err := os.Open(tmpName)
 		if err != nil {
-			log.Println("cannot open %v", file.Name())
+			log.Println("cannot open %v", tmpName)
 			continue
 		}
 		content, err := ioutil.ReadAll(file)
@@ -137,7 +141,7 @@ func OpenIntermediaFiles(reduceKey int, nReduce int) []KeyValue {
 		}
 		file.Close()
 		json.Unmarshal(content, &tmp)
-		fmt.Println("byte[]:", +len(content))
+		// fmt.Println("byte[]:", +len(content))
 		res = append(res, tmp...)
 	}
 	return res
@@ -179,7 +183,7 @@ func FinishJob(jobId int, reply *FinishResp) {
 	call("Coordinator.FinishJob", &args, &reply)
 
 	// reply.Y should be 100.
-	fmt.Println("finishJob")
+	// fmt.Println("finishJob")
 }
 
 func getJob(reply *JobReply) {
@@ -193,7 +197,7 @@ func getJob(reply *JobReply) {
 	call("Coordinator.DistributeJob", &args, &reply)
 
 	// reply.Y should be 100.
-	fmt.Printf("%v\n", reply)
+	// fmt.Printf("%v\n", reply)
 }
 
 //
@@ -225,9 +229,9 @@ func CallExample() {
 // returns false if something goes wrong.
 //
 func call(rpcname string, args interface{}, reply interface{}) bool {
-	c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
-	// sockname := coordinatorSock()
-	// c, err := rpc.DialHTTP("unix", sockname)
+	// c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
+	sockname := coordinatorSock()
+	c, err := rpc.DialHTTP("unix", sockname)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}

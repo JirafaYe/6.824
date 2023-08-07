@@ -6,8 +6,10 @@ package mr
 // remember to capitalize all names.
 //
 
-import "os"
-import "strconv"
+import (
+	"os"
+	"strconv"
+)
 
 //
 // example to show how to declare the arguments
@@ -27,8 +29,9 @@ type FinishResp struct {
 }
 
 type JobReply struct {
-	Job Job
-	Msg string
+	Job    Job
+	Msg    string
+	IsDone bool
 }
 
 type ExampleArgs struct {

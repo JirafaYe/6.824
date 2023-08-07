@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -19,6 +20,7 @@ type Coordinator struct {
 	MapChannel    chan *Job
 	ReduceChannel chan *Job
 	IsMapStatus   bool
+	AllDone       bool
 	JobManager    map[int]*JobManager
 	Jobs          []string
 	NReduce       int
@@ -46,16 +48,17 @@ func (c *Coordinator) DistributeJob(args *Request, reply *JobReply) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
+	reply.IsDone = c.AllDone
 	if c.IsMapStatus && len(c.MapChannel) != 0 {
-		fmt.Println("mapJob======")
+		// fmt.Println("mapJob======")
 		reply.Job = *<-c.MapChannel
 		c.JobManager[reply.Job.Id].StartTime = time.Now()
 	} else if !c.IsMapStatus && len(c.ReduceChannel) != 0 {
-		fmt.Println("ReduceJob======")
+		// fmt.Println("ReduceJob======")
 		reply.Job = *<-c.ReduceChannel
 		c.JobManager[reply.Job.Id].StartTime = time.Now()
 	} else {
-		fmt.Print("elseJob======")
+		// fmt.Print("elseJob======")
 		fmt.Println(c.IsMapStatus)
 		reply.Msg = "wait:isMap::" + strconv.FormatBool(c.IsMapStatus) + "::mapChann::" + strconv.Itoa(len(c.MapChannel)) + "::reduceChann" + strconv.Itoa(len(c.ReduceChannel)) + "::time::" + time.Now().String()
 	}
@@ -88,10 +91,10 @@ func (c *Coordinator) Example(args *ExampleArgs, reply *ExampleReply) error {
 func (c *Coordinator) server() {
 	rpc.Register(c)
 	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", ":1234")
-	// sockname := coordinatorSock()
-	// os.Remove(sockname)
-	// l, e := net.Listen("unix", sockname)
+	// l, e := net.Listen("tcp", ":1234")
+	sockname := coordinatorSock()
+	os.Remove(sockname)
+	l, e := net.Listen("unix", sockname)
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
@@ -105,22 +108,24 @@ func (c *Coordinator) server() {
 //
 
 func (c *Coordinator) Done() bool {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	ret := false
 	//判断是否已执行完map任务
 	finishMap := true
 	finishReduce := true
-	mutex.Lock()
-	defer mutex.Unlock()
-	fmt.Println("状态", c.IsMapStatus)
-	fmt.Println("::time::" + time.Now().String())
-	fmt.Println("检查任务状态")
+
+	// fmt.Println("状态", c.IsMapStatus)
+	// fmt.Println("::time::" + time.Now().String())
+	// fmt.Println("检查任务状态")
 	c.CheckJobStatus()
 
 	// for _,jobM := range c.JobManager{
 	// 	if !jobM.Job.Status
 	// }
 	if c.IsMapStatus && len(c.MapChannel) == 0 {
-		fmt.Println("map状态")
+		// fmt.Println("map状态")
 		for _, jobManager := range c.JobManager {
 			if jobManager.Job.IsMap && !jobManager.Job.Status {
 				finishMap = false
@@ -128,13 +133,13 @@ func (c *Coordinator) Done() bool {
 			}
 		}
 		if finishMap {
-			fmt.Println("修改状态")
+			// fmt.Println("修改状态")
 			c.IsMapStatus = !finishMap
 			// c.MakeReduceJob()
 			fmt.Println("map任务已完成")
 		}
 	} else if !c.IsMapStatus && len(c.ReduceChannel) == 0 {
-		fmt.Println("reduce状态")
+		// fmt.Println("reduce状态")
 		for _, jobManager := range c.JobManager {
 			if !jobManager.Job.IsMap && !jobManager.Job.Status {
 				finishReduce = false
@@ -152,6 +157,7 @@ func (c *Coordinator) Done() bool {
 
 	// Your code here.
 
+	c.AllDone = ret
 	return ret
 }
 
@@ -185,6 +191,7 @@ func MakeCoordinator(files []string, nReduce int) *Coordinator {
 	c := Coordinator{}
 
 	// Your code here.
+	c.AllDone = false
 	c.NReduce = nReduce
 	c.Jobs = files
 	c.MapChannel = make(chan *Job, len(c.Jobs))
@@ -223,8 +230,8 @@ var ReduceKey int
 func (c *Coordinator) MakeReduceJob() {
 	ReduceKey = 0
 	for ReduceKey < c.NReduce {
-		fmt.Printf("%d\n", ReduceKey)
-		fmt.Println(c.NReduce)
+		// fmt.Printf("%d\n", ReduceKey)
+		// fmt.Println(c.NReduce)
 		job := &Job{
 			Id:        JobId,
 			FileName:  "",
@@ -241,7 +248,7 @@ func (c *Coordinator) MakeReduceJob() {
 		}
 
 		JobId += 1
-		fmt.Printf("the %d loop", ReduceKey)
+		// fmt.Printf("the %d loop", ReduceKey)
 		ReduceKey += 1
 	}
 }
