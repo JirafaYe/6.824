@@ -280,24 +280,33 @@ func (rf *Raft) ticker() {
 		// be started and to randomize sleeping time using
 		// time.Sleep().
 
-		if rf.state == Follower {
-			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(201) + 200
-			time.Sleep(time.Duration(randomInt) * time.Millisecond)
-			select {
-			case <-rf.entriesLogCh:
-				continue
-			default:
-				rf.startElection()
-			}
-		} else if rf.state == Candidate {
+		if rf.state == Leader {
 			time.Sleep(rf.heartbeat)
-			args := &AppendEntriesArgs{}
+			args := &AppendEntriesArgs{
+				Term:     rf.currentTerm,
+				LeaderId: rf.me,
+				Entries:  nil,
+			}
 			reply := &AppendEntriesReply{}
 			for idx, _ := range rf.peers {
 				if idx != rf.me {
 					rf.sendAppendEntries(idx, args, reply)
 				}
+			}
+		} else {
+			//随即定时器，时间范围为400-60000ms，心跳间隔为200ms
+			rand.Seed(time.Now().UnixNano())
+			randomInt := rand.Intn(201) + 400
+			time.Sleep(time.Duration(randomInt) * time.Millisecond)
+			if rf.state == Follower {
+				select {
+				case <-rf.entriesLogCh:
+					continue
+				default:
+					rf.startElection()
+				}
+			} else if rf.state == Candidate {
+
 			}
 		}
 
@@ -305,7 +314,7 @@ func (rf *Raft) ticker() {
 }
 
 func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
-	if args == nil {
+	if args.Entries == nil {
 		rf.entriesLogCh <- struct{}{}
 	}
 }
