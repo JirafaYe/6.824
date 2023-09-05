@@ -1,5 +1,5 @@
 module 6.824
 
-go 1.15
+go 1.19
 
-require golang.org/x/text v0.9.0 // indirect
+require golang.org/x/text v0.12.0 // indirect

@@ -1,0 +1,7 @@
+{
+    "go.toolsEnvVars": {
+    
+        "GO111MODULE": "auto"
+    },
+    "go.useLanguageServer": false
+}
