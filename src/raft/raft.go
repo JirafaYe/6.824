@@ -194,18 +194,18 @@ type AppendEntries struct {
 	Reply *AppendEntriesReply
 }
 
-func (rf *Raft) GetElecState() int {
+func (rf *Raft) GetRfState() int {
 	rf.mu.Lock()
-	fmt.Println("::::LockElecState")
+	// fmt.Println("::::LockElecState")
 	defer rf.mu.Unlock()
-	fmt.Println("::::UnLockElecState")
+	// fmt.Println("::::UnLockElecState")
 
 	return rf.state
 }
 
 // example RequestVote RPC handler.
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	state := rf.GetElecState()
+	state := rf.GetRfState()
 
 	// rf.currentTerm++
 	// lastIdx := len(rf.log) - 1
@@ -217,47 +217,78 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// }
 	// Your code here (2A, 2B).
 	if state == Candidate {
-		for idx, _ := range rf.peers {
-			if idx == rf.me {
-				continue
-			}
-			fmt.Println("send::::Candidate::Folower", rf.me, idx)
+		reply.Term = rf.currentTerm
+		reply.VoteGranted = false
+		// rplys := rf.SendRequestVote(args, reply)
+		// for _, rply := range rplys {
+		// 	rf.mu.Lock()
+		// 	DPrintf("VoteLock1:::::%d", rf.me)
+		// 	if rply.Term == rf.currentTerm && rply.VoteGranted {
+		// 		rf.votes++
+		// 	} else if rply.Term > rf.currentTerm {
+		// 		rf.state = Follower
+		// 		rf.currentTerm--
+		// 		rf.votedFor = -1
+		// 	}
+		// 	rf.mu.Unlock()
+		// 	// fmt.Println("::::UnLockVote1")
+		// }
+		// for idx, _ := range rf.peers {
+		// 	if idx == rf.me {
+		// 		continue
+		// 	}
+		// 	fmt.Println("send::::Candidate::Folower", rf.me, idx)
 
-			var reply = &RequestVoteReply{}
-			rf.sendRequestVote(idx, args, reply)
-			// DPrintf("%d::::%#vReply:::::::::\n", idx, reply)
-			fmt.Println("aftSend::::Candidate::Folower:::rply", rf.me, idx, reply.VoteGranted)
-			rf.mu.Lock()
-			fmt.Println("VoteLock1:::::")
-			if reply.Term == rf.currentTerm && reply.VoteGranted {
-				rf.votes++
-			} else if reply.Term > rf.currentTerm {
-				rf.state = Follower
-				rf.currentTerm--
-				rf.votedFor = -1
-			}
-			rf.mu.Unlock()
-			fmt.Println("::::UnLockVote1")
+		// 	var reply = &RequestVoteReply{}
+		// 	rf.sendRequestVote(idx, args, reply)
+		// 	// DPrintf("%d::::%#vReply:::::::::\n", idx, reply)
+		// 	fmt.Println("aftSend::::Candidate::Folower:::rply", rf.me, idx, reply.VoteGranted)
+		// 	rf.mu.Lock()
+		// 	fmt.Println("VoteLock1:::::")
+		// 	if reply.Term == rf.currentTerm && reply.VoteGranted {
+		// 		rf.votes++
+		// 	} else if reply.Term > rf.currentTerm {
+		// 		rf.state = Follower
+		// 		rf.currentTerm--
+		// 		rf.votedFor = -1
+		// 	}
+		// 	rf.mu.Unlock()
+		// 	fmt.Println("::::UnLockVote1")
 
-		}
-		rf.mu.Lock()
-		fmt.Println("VoteLock2:::::")
+		// }
+		// rf.mu.Lock()
+		// fmt.Println("VoteLock2:::::")
 		// fmt.Println("sendALL::::Candidate::Folower", rf.me)
-		if rf.votes > len(rf.peers)/2 {
-			rf.state = Leader
-		} else {
-			rf.state = Follower
-			rf.currentTerm--
-			rf.votedFor = -1
-		}
-		rf.mu.Unlock()
-		fmt.Println("::::UnLockVote2")
+		// if rf.votes > len(rf.peers)/2 {
+		// 	rf.state = Leader
+		// 	rf.mu.Unlock()
+
+		// 	args := &AppendEntriesArgs{
+		// 		Term:     rf.currentTerm,
+		// 		LeaderId: rf.me,
+		// 		Entries:  nil,
+		// 	}
+		// 	// fmt.Println("::::UnLockTicker")
+		// 	reply := &AppendEntriesReply{}
+		// 	for idx, _ := range rf.peers {
+		// 		if idx != rf.me {
+		// 			rf.sendAppendEntries(idx, args, reply)
+		// 		}
+		// 	}
+		// } else {
+		// 	rf.state = Follower
+		// 	rf.currentTerm--
+		// 	rf.votedFor = -1
+		// 	rf.mu.Unlock()
+
+		// }
+		// fmt.Println("::::UnLockVote2")
 	} else {
 		rf.mu.Lock()
-		fmt.Println("VoteLock3:::::")
+		DPrintf("VoteLock3::::%d:", rf.me)
 		var flag = false
 		// fmt.Printf("%#v:::rf\n", rf)
-		fmt.Println("me:::::Votedfor:::term:::argsTerm::::Can", rf.me, rf.votedFor, rf.currentTerm, args.Term, args.CandidateId)
+		// fmt.Println("me:::::Votedfor:::term:::argsTerm::::Can", rf.me, rf.votedFor, rf.currentTerm, args.Term, args.CandidateId)
 		if (rf.votedFor == -1 || rf.votedFor == args.CandidateId) && args.Term >= rf.currentTerm {
 			flag = true
 			rf.votedFor = args.CandidateId
@@ -266,7 +297,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		reply.Term = rf.currentTerm
 		reply.VoteGranted = flag
 		rf.mu.Unlock()
-		fmt.Println("::::UnLockVote3")
+
+		DPrintf("VoteUnLock3::::%d:", rf.me)
 	}
 }
 
@@ -302,18 +334,65 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 	return ok
 }
 
-func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) []*RequestVoteReply {
+func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rplys := []*RequestVoteReply{}
+	wg := sync.WaitGroup{}
 	for idx, _ := range rf.peers {
 		if idx == rf.me {
 			continue
 		}
-		var reply = &RequestVoteReply{}
+		var reply = &RequestVoteReply{
+			Term: -1,
+		}
 		rplys = append(rplys, reply)
-		go rf.sendRequestVote(idx, args, reply)
+		i := idx
+		go func() {
+			rf.sendRequestVote(i, args, reply)
+			wg.Done()
+		}()
+		wg.Add(1)
 	}
-	time.Sleep(rf.election)
-	return rplys
+	wg.Wait()
+
+	for _, rply := range rplys {
+		rf.mu.Lock()
+		DPrintf("VoteLock1:::::%d", rf.me)
+		if rply.Term == rf.currentTerm && rply.VoteGranted {
+			rf.votes++
+		} else if rply.Term > rf.currentTerm {
+			rf.state = Follower
+			rf.currentTerm--
+			rf.votedFor = -1
+		}
+		rf.mu.Unlock()
+		// fmt.Println("::::UnLockVote1")
+	}
+
+	rf.mu.Lock()
+	// fmt.Println("VoteLock2:::::")
+	// fmt.Println("sendALL::::Candidate::Folower", rf.me)
+	if rf.votes > len(rf.peers)/2 {
+		rf.state = Leader
+		rf.mu.Unlock()
+
+		args := &AppendEntriesArgs{
+			Term:     rf.currentTerm,
+			LeaderId: rf.me,
+			Entries:  nil,
+		}
+		// fmt.Println("::::UnLockTicker")
+		reply := &AppendEntriesReply{}
+		for idx, _ := range rf.peers {
+			if idx != rf.me {
+				rf.sendAppendEntries(idx, args, reply)
+			}
+		}
+	} else {
+		rf.state = Follower
+		rf.currentTerm--
+		rf.votedFor = -1
+		rf.mu.Unlock()
+	}
 }
 
 // the service using Raft (e.g. a k/v server) wants to start
@@ -365,21 +444,20 @@ func (rf *Raft) ticker() {
 		// be started and to randomize sleeping time using
 		// time.Sleep().
 		// fmt.Println("ticker")
-		_, isLeader := rf.GetState()
-
-		if isLeader {
+		state := rf.GetRfState()
+		if state == Leader {
 			fmt.Println("isLeader", rf.me, ":::::::::")
 
 			time.Sleep(rf.heartbeat)
 			rf.mu.Lock()
-			fmt.Println("::::LockTicker")
+			// fmt.Println("::::LockTicker")
 			args := &AppendEntriesArgs{
 				Term:     rf.currentTerm,
 				LeaderId: rf.me,
 				Entries:  nil,
 			}
 			rf.mu.Unlock()
-			fmt.Println("::::UnLockTicker")
+			// fmt.Println("::::UnLockTicker")
 			reply := &AppendEntriesReply{}
 			for idx, _ := range rf.peers {
 				if idx != rf.me {
@@ -391,20 +469,20 @@ func (rf *Raft) ticker() {
 
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(1001) + 1000
+			randomInt := rand.Intn(1001) + 800
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
-			if rf.state == Follower {
-				select {
-				case <-rf.entriesLogCh:
-					fmt.Println("heartbeatTicker", rf.me)
-					// rf.mu.Lock()
-					// rf.votedFor = -1
-					// rf.mu.Unlock()
-				default:
-					fmt.Println("startElection::", rf.me)
-					rf.startElection()
-				}
+
+			select {
+			case <-rf.entriesLogCh:
+				fmt.Println("heartbeatTicker::::", rf.me)
+				// rf.mu.Lock()
+				// rf.votedFor = -1
+				// rf.mu.Unlock()
+			default:
+				fmt.Println("startElection::", rf.me)
+				rf.startElection()
 			}
+
 		}
 
 	}
@@ -413,16 +491,17 @@ func (rf *Raft) ticker() {
 func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 
 	if args.Entries == nil {
-		fmt.Println("accHeartBeat", rf.me)
 		rf.mu.Lock()
-		fmt.Println("::::LockAppendEntries")
+		DPrintf("HearbeatLock::%d", rf.me)
+		// fmt.Println("::::LockAppendEntries")
 		rf.votedFor = -1
 		if args.Term > rf.currentTerm {
 			rf.state = Follower
 			rf.currentTerm = args.Term
 		}
 		rf.mu.Unlock()
-		fmt.Println("::Unlock::appendEntries")
+		DPrintf("HearbeatunLock::%d", rf.me)
+		// fmt.Println("::Unlock::appendEntries")
 		rf.entriesLogCh <- struct{}{}
 	}
 }
@@ -455,7 +534,7 @@ func (rf *Raft) startElection() {
 	rf.mu.Unlock()
 	fmt.Println("::Unlock::StartElection")
 
-	rf.RequestVote(args, reply)
+	rf.SendRequestVote(args, reply)
 
 }
 
@@ -490,7 +569,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		state:        Follower,
 		entriesLogCh: make(chan struct{}, 2),
 		heartbeat:    200 * time.Millisecond,
-		election:     300 * time.Millisecond,
+		election:     500 * time.Millisecond,
 		currentTerm:  0,
 		votes:        0,
 	}
