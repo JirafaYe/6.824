@@ -18,8 +18,9 @@ package raft
 //
 
 import (
-	"fmt"
+
 	//	"bytes"
+
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -70,7 +71,7 @@ type Raft struct {
 	state        int
 	entriesLogCh chan struct{}
 	heartbeat    time.Duration
-	election     time.Duration
+	rpcTimeOut   time.Duration
 	votes        int
 
 	// Your data here (2A, 2B, 2C).
@@ -89,7 +90,7 @@ type Log struct {
 func (rf *Raft) GetState() (int, bool) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	fmt.Println("::::LockGetState")
+	//fmt.Println("::::LockGetState")
 
 	var term int
 	var isleader bool
@@ -97,8 +98,8 @@ func (rf *Raft) GetState() (int, bool) {
 	term = rf.currentTerm
 	isleader = rf.state == Leader
 
-	fmt.Println("GetState::::::::", term, isleader, rf.me)
-	fmt.Println("::::UnLockGetState")
+	//fmt.Println("GetState::::::::", term, isleader, rf.me)
+	//fmt.Println("::::UnLockGetState")
 
 	return term, isleader
 }
@@ -196,49 +197,36 @@ type AppendEntries struct {
 
 func (rf *Raft) GetRfState() int {
 	rf.mu.Lock()
-	// fmt.Println("::::LockElecState")
+	// //fmt.Println("::::LockElecState")
 	defer rf.mu.Unlock()
-	// fmt.Println("::::UnLockElecState")
+	// //fmt.Println("::::UnLockElecState")
 
 	return rf.state
 }
 
 // example RequestVote RPC handler.
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	state := rf.GetRfState()
 	rf.mu.Lock()
-	DPrintf("VoteLock3::::%d::state:%d", rf.me, rf.state)
+	DPrintf("VoteLock3:::::%d", rf.me)
 
-	// Your code here (2A, 2B).
-	if state != Follower {
-		flag := false
-		if args.Term > rf.currentTerm {
-			rf.currentTerm = args.Term
-			rf.state = Follower
-			rf.votedFor = args.CandidateId
-			flag = true
-		}
-		reply.Term = rf.currentTerm
-		reply.VoteGranted = flag
-		rf.mu.Unlock()
-		DPrintf("VoteUnLock3::::%d::term::%d::%#v", rf.me, rf.currentTerm, reply)
-
-	} else {
-
-		var flag = false
-		// fmt.Printf("%#v:::rf\n", rf)
-		// fmt.Println("me:::::Votedfor:::term:::argsTerm::::Can", rf.me, rf.votedFor, rf.currentTerm, args.Term, args.CandidateId)
-		if (rf.votedFor == -1 || rf.votedFor == args.CandidateId) && args.Term == rf.currentTerm || args.Term > rf.currentTerm {
-			flag = true
-			rf.votedFor = args.CandidateId
-			rf.currentTerm = args.Term
-		}
-		reply.Term = rf.currentTerm
-		reply.VoteGranted = flag
-		rf.mu.Unlock()
-
-		DPrintf("VoteUnLock3::::%d::%#v", rf.me, reply)
+	var flag = false
+	if args.Term > rf.currentTerm {
+		rf.currentTerm = args.Term
+		rf.state = Follower
+		rf.votedFor = -1
 	}
+	// fmt.Printf("%#v:::rf\n", rf)
+	// //fmt.Println("me:::::Votedfor:::term:::argsTerm::::Can", rf.me, rf.votedFor, rf.currentTerm, args.Term, args.CandidateId)
+	if (rf.votedFor == -1 || rf.votedFor == args.CandidateId) && args.Term == rf.currentTerm {
+		flag = true
+		rf.votedFor = args.CandidateId
+	}
+	reply.Term = rf.currentTerm
+	reply.VoteGranted = flag
+	rf.mu.Unlock()
+	// rf.resetTimer()
+
+	DPrintf("VoteUnLock3:::me:%d::ArgsTerm::%d:%#v", rf.me, args.Term, reply)
 }
 
 // example code to send a RequestVote RPC to a server.
@@ -273,27 +261,47 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 	return ok
 }
 
+var chMu sync.Mutex
+
 func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	rplys := []*RequestVoteReply{}
-	wg := sync.WaitGroup{}
+	// rplys := []*RequestVoteReply{}
+	chRplys := make(chan RequestVoteReply, len(rf.peers)-1)
+	chTimeout := make(chan struct{}, len(rf.peers))
+	// ctx, cancel := context.WithCancel(context.Background())
+
+	//超时处理
+	go rf.quitRpcTimeout(chRplys, chTimeout)
+
 	for idx, _ := range rf.peers {
 		if idx == rf.me {
 			continue
 		}
 		var reply = &RequestVoteReply{}
-		rplys = append(rplys, reply)
+		// rplys = append(rplys, reply)
 		i := idx
 		go func() {
-			rf.sendRequestVote(i, args, reply)
-			wg.Done()
-		}()
-		wg.Add(1)
-	}
-	wg.Wait()
 
-	for _, rply := range rplys {
+			rf.sendRequestVote(i, args, reply)
+			select {
+			case <-chTimeout:
+				DPrintf("rpc超时,chan已关闭,me::%d", i)
+			default:
+				chMu.Lock()
+				DPrintf("rpc响应,me::%d", i)
+				chRplys <- *reply
+				chMu.Unlock()
+			}
+		}()
+	}
+
+	//阻塞等待rpc超时
+	DPrintf("TimeoutBefore:%d", rf.me)
+	<-chTimeout
+	DPrintf("Timeoutaft:%d,len::%d", rf.me, len(chTimeout))
+
+	for rply := range chRplys {
 		rf.mu.Lock()
-		DPrintf("GetVoteRply:::::%d::rply:%#v", rf.me, rply)
+		DPrintf("GetVoteRply:::me::%d::term::%d::rply:%#v", rf.me, rf.currentTerm, rply)
 		if rply.Term == rf.currentTerm && rply.VoteGranted {
 			rf.votes++
 		} else if rply.Term > rf.currentTerm {
@@ -303,15 +311,16 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		}
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock1:::::%d", rf.me)
-		// fmt.Println("::::UnLockVote1")
+		// //fmt.Println("::::UnLockVote1")
 	}
 
 	rf.mu.Lock()
-	// fmt.Println("VoteLock2:::::")
-	// fmt.Println("sendALL::::Candidate::Folower", rf.me)
-	if rf.votes > len(rf.peers)/2 {
+	DPrintf("VoteLock2:::::%d", rf.me)
+	// //fmt.Println("sendALL::::Candidate::Folower", rf.me)
+	if rf.votes > len(rf.peers)/2 && rf.state == Candidate {
 		rf.state = Leader
 		rf.mu.Unlock()
+		DPrintf("VoteUnLock2:::::%d", rf.me)
 
 		args := &AppendEntriesArgs{
 			Term:     rf.currentTerm,
@@ -319,10 +328,10 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 			Entries:  nil,
 		}
 		DPrintf("SenHeartBeat.Leader:%d", rf.me)
-		reply := &AppendEntriesReply{}
 		for idx, _ := range rf.peers {
 			if idx != rf.me {
 				i := idx
+				reply := &AppendEntriesReply{}
 				go rf.sendAppendEntries(i, args, reply)
 			}
 		}
@@ -331,7 +340,20 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		rf.currentTerm--
 		rf.votedFor = -1
 		rf.mu.Unlock()
+		DPrintf("VoteUnLock2:::::%d", rf.me)
 	}
+}
+
+func (rf *Raft) quitRpcTimeout(chReplys chan RequestVoteReply, chTimeout chan struct{}) {
+	time.Sleep(rf.rpcTimeOut)
+	for i := 0; i < cap(chTimeout); i++ {
+		chTimeout <- struct{}{}
+		DPrintf("close::::%d,len::%d", i, len(chTimeout))
+	}
+	DPrintf("cancel:::::::::me::%d", rf.me)
+	chMu.Lock()
+	close(chReplys)
+	chMu.Unlock()
 }
 
 // the service using Raft (e.g. a k/v server) wants to start
@@ -382,21 +404,21 @@ func (rf *Raft) ticker() {
 		// Your code here to check if a leader election should
 		// be started and to randomize sleeping time using
 		// time.Sleep().
-		// fmt.Println("ticker")
+		// //fmt.Println("ticker")
 		state := rf.GetRfState()
 		if state == Leader {
-			fmt.Println("isLeader", rf.me, ":::::::::")
+			//fmt.Println("isLeader", rf.me, ":::::::::")
 
 			time.Sleep(rf.heartbeat)
 			rf.mu.Lock()
-			// fmt.Println("::::LockTicker")
+			// //fmt.Println("::::LockTicker")
 			args := &AppendEntriesArgs{
 				Term:     rf.currentTerm,
 				LeaderId: rf.me,
 				Entries:  nil,
 			}
 			rf.mu.Unlock()
-			// fmt.Println("::::UnLockTicker")
+			// //fmt.Println("::::UnLockTicker")
 			reply := &AppendEntriesReply{}
 			for idx, _ := range rf.peers {
 				if idx != rf.me {
@@ -404,22 +426,22 @@ func (rf *Raft) ticker() {
 				}
 			}
 		} else {
-			// fmt.Println("Follower")
+			// //fmt.Println("Follower")
 
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(801) + 200
+			randomInt := rand.Intn(210) + 200
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
 
 			select {
 			case <-rf.entriesLogCh:
-				fmt.Println("heartbeatTicker::::", rf.me)
+				//fmt.Println("resetTimer::::", rf.me)
 				// rf.mu.Lock()
 				// rf.votedFor = -1
 				// rf.mu.Unlock()
 			default:
-				fmt.Println("startElection::", rf.me)
+				//fmt.Println("startElection::", rf.me)
 				rf.startElection()
 			}
 
@@ -428,21 +450,31 @@ func (rf *Raft) ticker() {
 	}
 }
 
+func (rf *Raft) resetTimer() {
+	if len(rf.entriesLogCh) == 0 {
+		rf.entriesLogCh <- struct{}{}
+	}
+}
+
 func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 
 	if args.Entries == nil {
 		rf.mu.Lock()
-		DPrintf("HearbeatLock::%d", rf.me)
-		// fmt.Println("::::LockAppendEntries")
+		DPrintf("HearbeatLock::%d::args::%#v", rf.me, args)
+		// //fmt.Println("::::LockAppendEntries")
 		rf.votedFor = -1
 		if args.Term > rf.currentTerm {
 			rf.state = Follower
 			rf.currentTerm = args.Term
+		} else if args.Term == rf.currentTerm {
+			rf.state = Follower
+			rf.votedFor = -1
 		}
+		reply.Term = rf.currentTerm
 		rf.mu.Unlock()
 		DPrintf("HearbeatunLock::%d", rf.me)
-		// fmt.Println("::Unlock::appendEntries")
-		rf.entriesLogCh <- struct{}{}
+		// //fmt.Println("::Unlock::appendEntries")
+		rf.resetTimer()
 	}
 }
 
@@ -453,7 +485,7 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 
 func (rf *Raft) startElection() {
 	rf.mu.Lock()
-	fmt.Println("::lock::StartElection")
+	//fmt.Println("::lock::StartElection")
 
 	rf.currentTerm++
 	rf.votedFor = rf.me
@@ -472,7 +504,7 @@ func (rf *Raft) startElection() {
 		VoteGranted: false,
 	}
 	rf.mu.Unlock()
-	fmt.Println("::Unlock::StartElection")
+	//fmt.Println("::Unlock::StartElection")
 
 	rf.SendRequestVote(args, reply)
 
@@ -508,8 +540,8 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		votedFor:     -1,
 		state:        Follower,
 		entriesLogCh: make(chan struct{}, 1),
-		heartbeat:    200 * time.Millisecond,
-		election:     500 * time.Millisecond,
+		heartbeat:    100 * time.Millisecond,
+		rpcTimeOut:   200 * time.Millisecond,
 		currentTerm:  0,
 		votes:        0,
 	}
