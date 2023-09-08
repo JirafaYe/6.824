@@ -99,7 +99,7 @@ func (rf *Raft) GetState() (int, bool) {
 	term = rf.currentTerm
 	isleader = rf.state == Leader
 
-	DPrintf("Term[%d] isLeader[%t]", term, isleader) //fmt.Println("::::UnLockGetState")
+	DPrintf("me[%d] Term[%d] isLeader[%t]", rf.me, term, isleader) //fmt.Println("::::UnLockGetState")
 
 	return term, isleader
 }
@@ -209,6 +209,7 @@ func (rf *Raft) GetRfState() int {
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
 	DPrintf("VoteLock3:::::%d", rf.me)
+	DPrintf("VoteRaft Term[%d] VotedFor[%d]", rf.currentTerm, rf.votedFor)
 
 	var flag = false
 	if args.Term > rf.currentTerm {
@@ -500,10 +501,14 @@ func (rf *Raft) resetTimer() {
 }
 
 func (rf *Raft) transState(state int, term int) {
+	DPrintf("TransTo[%d] me[%d]", state, rf.me)
+	if term > rf.currentTerm {
+		rf.votedFor = -1
+	}
 	switch state {
 	case Follower:
 		rf.state = Follower
-		rf.votedFor = -1
+		// rf.votedFor = -1
 		rf.currentTerm = term
 	case Candidate:
 		rf.state = Candidate
@@ -512,7 +517,6 @@ func (rf *Raft) transState(state int, term int) {
 		rf.votes = 1
 	case Leader:
 		rf.state = Leader
-		rf.votedFor = -1
 	}
 }
 
@@ -589,7 +593,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		state:        Follower,
 		entriesLogCh: make(chan struct{}, 1),
 		heartbeat:    100 * time.Millisecond,
-		rpcTimeOut:   200 * time.Millisecond,
+		rpcTimeOut:   180 * time.Millisecond,
 		currentTerm:  0,
 		votes:        0,
 		commitIndex:  0,
