@@ -286,6 +286,7 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 			case <-chTimeout:
 				DPrintf("rpc超时,chan已关闭,me::%d", i)
 			default:
+				//防止chan在close时被写入造成data race
 				chMu.Lock()
 				DPrintf("rpc响应,me::%d", i)
 				chRplys <- *reply
@@ -310,12 +311,12 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 			rf.votedFor = -1
 		}
 		rf.mu.Unlock()
-		DPrintf("VoteUnLock1:::::%d", rf.me)
+		DPrintf("VoteUnLock1:::::%d::votes::%d", rf.me, rf.votes)
 		// //fmt.Println("::::UnLockVote1")
 	}
 
 	rf.mu.Lock()
-	DPrintf("VoteLock2:::::%d", rf.me)
+	DPrintf("VoteLock2:::::%d::votes::%d::state::%d", rf.me, rf.votes, rf.state)
 	// //fmt.Println("sendALL::::Candidate::Folower", rf.me)
 	if rf.votes > len(rf.peers)/2 && rf.state == Candidate {
 		rf.state = Leader
@@ -372,6 +373,11 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	index := -1
 	term := -1
 	isLeader := true
+
+	term, isLeader = rf.GetState()
+	rf.mu.Lock()
+	index = len(rf.logs)
+	rf.mu.Unlock()
 
 	// Your code here (2B).
 
@@ -485,7 +491,7 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 
 func (rf *Raft) startElection() {
 	rf.mu.Lock()
-	//fmt.Println("::lock::StartElection")
+	DPrintf("::lock::StartElection%d", rf.me)
 
 	rf.currentTerm++
 	rf.votedFor = rf.me
@@ -504,8 +510,9 @@ func (rf *Raft) startElection() {
 		VoteGranted: false,
 	}
 	rf.mu.Unlock()
-	//fmt.Println("::Unlock::StartElection")
+	DPrintf("::Unlock::StartElection%d", rf.me)
 
+	DPrintf("VoteArgs::%#v", args)
 	rf.SendRequestVote(args, reply)
 
 }
