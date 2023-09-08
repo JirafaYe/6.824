@@ -59,11 +59,12 @@ const (
 
 // A Go object implementing a single Raft peer.
 type Raft struct {
-	mu        sync.Mutex          // Lock to protect shared access to this peer's state
-	peers     []*labrpc.ClientEnd // RPC end points of all peers
-	persister *Persister          // Object to hold this peer's persisted state
-	me        int                 // this peer's index into peers[]
-	dead      int32               // set by Kill()
+	mu          sync.Mutex          // Lock to protect shared access to this peer's state
+	peers       []*labrpc.ClientEnd // RPC end points of all peers
+	persister   *Persister          // Object to hold this peer's persisted state
+	me          int                 // this peer's index into peers[]
+	dead        int32               // set by Kill()
+	commitIndex int
 
 	currentTerm  int
 	votedFor     int //当前任期内收到选票的 candidateId，如果没有投给任何候选人 则为空
@@ -81,8 +82,8 @@ type Raft struct {
 }
 
 type Log struct {
-	Msg  string
-	Term int
+	Command interface{}
+	Term    int
 }
 
 // return currentTerm and whether this server
@@ -98,8 +99,7 @@ func (rf *Raft) GetState() (int, bool) {
 	term = rf.currentTerm
 	isleader = rf.state == Leader
 
-	//fmt.Println("GetState::::::::", term, isleader, rf.me)
-	//fmt.Println("::::UnLockGetState")
+	DPrintf("Term[%d] isLeader[%t]", term, isleader) //fmt.Println("::::UnLockGetState")
 
 	return term, isleader
 }
@@ -180,9 +180,10 @@ type AppendEntriesArgs struct {
 	PrevLogIndex int
 	PrevLogTerm  int
 	//log entries to store,empty for heartbeat
-	Entries []Log
+	Entries map[int]Log
 	//leader's commit idx
 	// LeaderCommit int
+	LeaderCommit int
 }
 
 type AppendEntriesReply struct {
@@ -211,9 +212,10 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	var flag = false
 	if args.Term > rf.currentTerm {
-		rf.currentTerm = args.Term
-		rf.state = Follower
-		rf.votedFor = -1
+		// rf.currentTerm = args.Term
+		// rf.state = Follower
+		// rf.votedFor = -1
+		rf.transState(Follower, args.Term)
 	}
 	// fmt.Printf("%#v:::rf\n", rf)
 	// //fmt.Println("me:::::Votedfor:::term:::argsTerm::::Can", rf.me, rf.votedFor, rf.currentTerm, args.Term, args.CandidateId)
@@ -261,6 +263,32 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 	return ok
 }
 
+func (rf *Raft) sendAllAppendEntries(index int) {
+	entries := make(map[int]Log)
+	len := len(rf.logs)
+	if index == -1 {
+		entries = nil
+	} else {
+		entries[index] = rf.logs[index]
+	}
+
+	args := &AppendEntriesArgs{
+		Term:         rf.currentTerm,
+		LeaderId:     rf.me,
+		PrevLogIndex: len - 1,
+		PrevLogTerm:  rf.logs[len-1].Term,
+		Entries:      entries,
+		LeaderCommit: rf.commitIndex,
+	}
+	for idx, _ := range rf.peers {
+		if idx != rf.me {
+			i := idx
+			reply := &AppendEntriesReply{}
+			rf.sendAppendEntries(i, args, reply)
+		}
+	}
+}
+
 var chMu sync.Mutex
 
 func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
@@ -306,9 +334,10 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		if rply.Term == rf.currentTerm && rply.VoteGranted {
 			rf.votes++
 		} else if rply.Term > rf.currentTerm {
-			rf.state = Follower
-			rf.currentTerm--
-			rf.votedFor = -1
+			// rf.state = Follower
+			// rf.currentTerm--
+			// rf.votedFor = -1
+			rf.transState(Follower, rply.Term)
 		}
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock1:::::%d::votes::%d", rf.me, rf.votes)
@@ -319,7 +348,7 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 	DPrintf("VoteLock2:::::%d::votes::%d::state::%d", rf.me, rf.votes, rf.state)
 	// //fmt.Println("sendALL::::Candidate::Folower", rf.me)
 	if rf.votes > len(rf.peers)/2 && rf.state == Candidate {
-		rf.state = Leader
+		rf.transState(Leader, rf.currentTerm)
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 
@@ -333,13 +362,14 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 			if idx != rf.me {
 				i := idx
 				reply := &AppendEntriesReply{}
-				go rf.sendAppendEntries(i, args, reply)
+				rf.sendAppendEntries(i, args, reply)
 			}
 		}
 	} else {
-		rf.state = Follower
-		rf.currentTerm--
-		rf.votedFor = -1
+		// rf.state = Follower
+		// rf.currentTerm--
+		// rf.votedFor = -1
+		rf.transState(Follower, rf.currentTerm-1)
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 	}
@@ -374,12 +404,19 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	term := -1
 	isLeader := true
 
+	// Your code here (2B).
+
 	term, isLeader = rf.GetState()
 	rf.mu.Lock()
 	index = len(rf.logs)
+	log := Log{
+		Term:    rf.currentTerm,
+		Command: command,
+	}
+	rf.logs = append(rf.logs, log)
 	rf.mu.Unlock()
 
-	// Your code here (2B).
+	rf.sendAllAppendEntries(index)
 
 	return index, term, isLeader
 }
@@ -462,25 +499,41 @@ func (rf *Raft) resetTimer() {
 	}
 }
 
-func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
+func (rf *Raft) transState(state int, term int) {
+	switch state {
+	case Follower:
+		rf.state = Follower
+		rf.votedFor = -1
+		rf.currentTerm = term
+	case Candidate:
+		rf.state = Candidate
+		rf.currentTerm = term
+		rf.votedFor = rf.me
+		rf.votes = 1
+	case Leader:
+		rf.state = Leader
+		rf.votedFor = -1
+	}
+}
 
+func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
+	rf.mu.Lock()
 	if args.Entries == nil {
-		rf.mu.Lock()
 		DPrintf("HearbeatLock::%d::args::%#v", rf.me, args)
 		// //fmt.Println("::::LockAppendEntries")
-		rf.votedFor = -1
-		if args.Term > rf.currentTerm {
-			rf.state = Follower
-			rf.currentTerm = args.Term
-		} else if args.Term == rf.currentTerm {
-			rf.state = Follower
-			rf.votedFor = -1
+		// rf.votedFor = -1
+		if args.Term >= rf.currentTerm {
+			// rf.state = Follower
+			// rf.currentTerm = args.Term
+			rf.transState(Follower, args.Term)
 		}
 		reply.Term = rf.currentTerm
 		rf.mu.Unlock()
 		DPrintf("HearbeatunLock::%d", rf.me)
 		// //fmt.Println("::Unlock::appendEntries")
 		rf.resetTimer()
+	} else {
+
 	}
 }
 
@@ -493,10 +546,11 @@ func (rf *Raft) startElection() {
 	rf.mu.Lock()
 	DPrintf("::lock::StartElection%d", rf.me)
 
-	rf.currentTerm++
-	rf.votedFor = rf.me
-	rf.state = Candidate
-	rf.votes = 1
+	// rf.currentTerm++
+	// rf.votedFor = rf.me
+	// rf.state = Candidate
+	// rf.votes = 1
+	rf.transState(Candidate, rf.currentTerm+1)
 
 	idx := len(rf.logs)
 	args := &RequestVoteArgs{
@@ -516,19 +570,6 @@ func (rf *Raft) startElection() {
 	rf.SendRequestVote(args, reply)
 
 }
-
-// func (rf *Raft) transState(state int) {
-// 	switch state {
-// 	case Leader:
-// 		rf.state = Leader
-// 	case Candidate:
-// 		rf.state = Candidate
-// 		rf.currentTerm++
-// 	case Follower:
-// 		rf.state = Follower
-// 		rf.currentTerm--
-// 	}
-// }
 
 // the service or tester wants to create a Raft server. the ports
 // of all the Raft servers (including this one) are in peers[]. this
@@ -551,13 +592,14 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		rpcTimeOut:   200 * time.Millisecond,
 		currentTerm:  0,
 		votes:        0,
+		commitIndex:  0,
 	}
 	rf.peers = peers
 	rf.persister = persister
 	rf.me = me
 	log := Log{
-		Msg:  "",
-		Term: rf.currentTerm,
+		Command: nil,
+		Term:    rf.currentTerm,
 	}
 	rf.logs = append(rf.logs, log)
 
