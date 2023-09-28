@@ -227,7 +227,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	reply.Term = rf.currentTerm
 	reply.VoteGranted = flag
 	rf.mu.Unlock()
-	// rf.resetTimer()
+	rf.resetTimer()
 
 	DPrintf("VoteUnLock3:::me:%d::ArgsTerm::%d:%#v", rf.me, args.Term, reply)
 }
@@ -262,32 +262,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
 	return ok
-}
-
-func (rf *Raft) sendAllAppendEntries(index int) {
-	entries := make(map[int]Log)
-	len := len(rf.logs)
-	if index == -1 {
-		entries = nil
-	} else {
-		entries[index] = rf.logs[index]
-	}
-
-	args := &AppendEntriesArgs{
-		Term:         rf.currentTerm,
-		LeaderId:     rf.me,
-		PrevLogIndex: len - 1,
-		PrevLogTerm:  rf.logs[len-1].Term,
-		Entries:      entries,
-		LeaderCommit: rf.commitIndex,
-	}
-	for idx, _ := range rf.peers {
-		if idx != rf.me {
-			i := idx
-			reply := &AppendEntriesReply{}
-			rf.sendAppendEntries(i, args, reply)
-		}
-	}
 }
 
 var chMu sync.Mutex
@@ -363,7 +337,7 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 			if idx != rf.me {
 				i := idx
 				reply := &AppendEntriesReply{}
-				rf.sendAppendEntries(i, args, reply)
+				go rf.sendAppendEntries(i, args, reply)
 			}
 		}
 	} else {
@@ -474,7 +448,7 @@ func (rf *Raft) ticker() {
 
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(210) + 200
+			randomInt := rand.Intn(300) + 250
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
 
@@ -520,6 +494,32 @@ func (rf *Raft) transState(state int, term int) {
 	}
 }
 
+func (rf *Raft) sendAllAppendEntries(index int) {
+	entries := make(map[int]Log)
+	len := len(rf.logs)
+	if index == -1 {
+		entries = nil
+	} else {
+		entries[index] = rf.logs[index]
+	}
+
+	args := &AppendEntriesArgs{
+		Term:         rf.currentTerm,
+		LeaderId:     rf.me,
+		PrevLogIndex: len - 1,
+		PrevLogTerm:  rf.logs[len-1].Term,
+		Entries:      entries,
+		LeaderCommit: rf.commitIndex,
+	}
+	for idx, _ := range rf.peers {
+		if idx != rf.me {
+			i := idx
+			reply := &AppendEntriesReply{}
+			rf.sendAppendEntries(i, args, reply)
+		}
+	}
+}
+
 func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	rf.mu.Lock()
 	if args.Entries == nil {
@@ -537,8 +537,30 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 		// //fmt.Println("::Unlock::appendEntries")
 		rf.resetTimer()
 	} else {
-
+		DPrintf("LogAppendLock::%d::args::%#v", rf.me, args)
+		if args.Term < rf.currentTerm || !rf.checkEntries(args) {
+			reply.Success = false
+		} else {
+			reply.Success = true
+			rf.logs = append(rf.logs, args.Entries[args.PrevLogIndex+1])
+			DPrintf("Append Logs[%#v] ArgsLog[%#v]", rf.logs, args.Entries)
+		}
+		reply.Term = rf.currentTerm
+		rf.mu.Unlock()
 	}
+}
+
+func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
+
+	ret := false
+	for i := len(rf.logs) - 1; i >= 0; i-- {
+		if i == args.PrevLogIndex && args.PrevLogTerm == rf.logs[i].Term {
+			ret = true
+			break
+		}
+	}
+
+	return ret
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
