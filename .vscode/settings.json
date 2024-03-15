@@ -3,5 +3,8 @@
     
         "GO111MODULE": "auto"
     },
-    "go.useLanguageServer": false
+    "go.useLanguageServer": true,
+    "gopls": {
+    
+    }
 }
