@@ -596,6 +596,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 
 func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	if args.Entries == nil {
 		DPrintf("HearbeatLock::%d::args::%#v", rf.me, args)
 		if args.Term >= rf.currentTerm {
@@ -603,7 +604,7 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 		}
 		reply.Term = rf.currentTerm
 		// rf.commitIndex = args.LeaderCommit
-		rf.mu.Unlock()
+		// rf.mu.Unlock()
 		DPrintf("HearbeatunLock::%d::logs[%#v]", rf.me, rf.logs)
 		rf.resetTimer()
 	} else {
@@ -616,7 +617,7 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 			DPrintf("Append Logs[%#v]", rf.logs)
 		}
 		reply.Term = rf.currentTerm
-		rf.mu.Unlock()
+		// rf.mu.Unlock()
 	}
 	if args.LeaderCommit > rf.commitIndex {
 		//set commitIndex=min(LeaderCommit,index of last new entry)
