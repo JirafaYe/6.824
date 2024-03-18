@@ -52,9 +52,11 @@ type ApplyMsg struct {
 }
 
 const (
-	Follower  int = 0
-	Leader    int = 1
-	Candidate int = -1
+	Follower   int           = 0
+	Leader     int           = 1
+	Candidate  int           = -1
+	heartbeat  time.Duration = 100 * time.Millisecond
+	rpcTimeOut time.Duration = 180 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -77,8 +79,6 @@ type Raft struct {
 	logs         []Log
 	state        int
 	entriesLogCh chan struct{}
-	heartbeat    time.Duration
-	rpcTimeOut   time.Duration
 	votes        int
 
 	// Your data here (2A, 2B, 2C).
@@ -391,7 +391,7 @@ func (rf *Raft) initializeNextIndex() {
 }
 
 func (rf *Raft) quitRpcTimeout(chReplys chan interface{}, chTimeout chan struct{}, mu *sync.Mutex) {
-	time.Sleep(rf.rpcTimeOut)
+	time.Sleep(rpcTimeOut)
 	for i := 0; i < cap(chTimeout); i++ {
 		chTimeout <- struct{}{}
 		DPrintf("close::::%d,len::%d", i, len(chTimeout))
@@ -466,8 +466,7 @@ func (rf *Raft) ticker() {
 		state := rf.GetRfState()
 		if state == Leader {
 			//fmt.Println("isLeader", rf.me, ":::::::::")
-
-			time.Sleep(rf.heartbeat)
+			time.Sleep(heartbeat)
 			rf.mu.Lock()
 			// fmt.Println("::::LockTicker")
 			args := &AppendEntriesArgs{
@@ -485,7 +484,7 @@ func (rf *Raft) ticker() {
 				// if args.Entries != nil {
 				// 	DPrintf("retry send entry server[%d]", idx)
 				// }
-				DPrintf("server[%d] nextIndex[%d] len[%d]", idx, rf.nextIndex[idx], len(rf.logs))
+				// DPrintf("server[%d] nextIndex[%d] len[%d]", idx, rf.nextIndex[idx], len(rf.logs))
 
 				if idx != rf.me {
 					rf.sendAppendEntries(idx, args, reply)
@@ -657,7 +656,7 @@ func (rf *Raft) retry(peer int) {
 		} else {
 			rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
 		}
-		time.Sleep(rf.heartbeat)
+		time.Sleep(heartbeat)
 	}
 }
 
@@ -850,8 +849,6 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		votedFor:     -1,
 		state:        Follower,
 		entriesLogCh: make(chan struct{}, 1),
-		heartbeat:    100 * time.Millisecond,
-		rpcTimeOut:   180 * time.Millisecond,
 		currentTerm:  0,
 		votes:        0,
 		commitIndex:  0,
