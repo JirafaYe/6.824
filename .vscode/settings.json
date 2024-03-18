@@ -6,5 +6,7 @@
     "go.useLanguageServer": true,
     "gopls": {
     
-    }
+    },
+    "go.coverOnSingleTestFile": false,
+    "go.testFlags": ["-v","-count=1"],
 }
