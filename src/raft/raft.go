@@ -390,7 +390,7 @@ func (rf *Raft) initializeNextIndex() {
 
 	for idx := range rf.nextIndex {
 		rf.nextIndex[idx] = len(rf.logs) + 1
-		rf.matchIndex[idx] = 0
+		// rf.matchIndex[idx] = 0
 	}
 
 }
