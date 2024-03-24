@@ -56,7 +56,7 @@ const (
 	Leader     int           = 1
 	Candidate  int           = -1
 	heartbeat  time.Duration = 100 * time.Millisecond
-	rpcTimeOut time.Duration = 200 * time.Millisecond
+	rpcTimeOut time.Duration = 180 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -245,11 +245,13 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	}
 	reply.Term = rf.currentTerm
 	reply.VoteGranted = flag
-	rf.mu.Unlock()
-	rf.resetTimer()
+
 	DPrintf("VoteRaft Term[%d] VotedFor[%d] server[%d]", rf.currentTerm, rf.votedFor, rf.me)
 
 	DPrintf("VoteUnLock3:::me:%d::ArgsTerm::%d:%#v", rf.me, args.Term, reply)
+	rf.mu.Unlock()
+	rf.resetTimer()
+
 }
 
 // example code to send a RequestVote RPC to a server.
@@ -390,7 +392,7 @@ func (rf *Raft) initializeNextIndex() {
 
 	for idx := range rf.nextIndex {
 		rf.nextIndex[idx] = len(rf.logs) + 1
-		// rf.matchIndex[idx] = 0
+		rf.matchIndex[idx] = 0
 	}
 
 }
@@ -489,6 +491,7 @@ func (rf *Raft) ticker() {
 			reply := &AppendEntriesReply{}
 			for idx, _ := range rf.peers {
 				args := rf.getEntriesArgs(idx)
+				args.Entries = nil
 				// if args.Entries != nil {
 				// 	DPrintf("retry send entry server[%d]", idx)
 				// }
