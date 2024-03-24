@@ -429,11 +429,14 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		Term:    term,
 	}
 	rf.logs = append(rf.logs, appendEntrie)
+	lenLogs := len(rf.logs)
+
+	DPrintf("LeaderServer[%d] idx[%d] entries[%#v]", rf.me, len(rf.logs), appendEntrie)
 	rf.mu.Unlock()
 
-	rf.sendAppendEntriesAll(len(rf.logs))
+	rf.sendAppendEntriesAll(lenLogs)
 
-	return len(rf.logs), term, isLeader
+	return lenLogs, term, isLeader
 }
 
 // the tester doesn't halt goroutines created by Raft after each test,
@@ -523,6 +526,8 @@ func (rf *Raft) resetTimer() {
 
 func (rf *Raft) transState(state int, term int) {
 	DPrintf("TransTo[%d] me[%d]", state, rf.me)
+	// rf.mu.Lock()
+	// defer rf.mu.Unlock()
 	if term > rf.currentTerm {
 		rf.votedFor = -1
 	}
@@ -649,12 +654,15 @@ func (rf *Raft) retry(peer int) {
 		rply := &AppendEntriesReply{}
 		args := rf.getEntriesArgs(peer)
 		rf.sendAppendEntries(peer, &args, rply)
+		rf.mu.Lock()
 		if rply.Term == rf.currentTerm && rply.Success {
 			rf.nextIndex[rply.Me] = len(rf.logs) + 1
 			rf.matchIndex[rply.Me] = len(rf.logs)
+			rf.mu.Unlock()
 			break
 		} else {
 			rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
+			rf.mu.Unlock()
 		}
 		time.Sleep(heartbeat)
 	}
@@ -742,7 +750,7 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 	if args.PrevLogIndex > 0 && rf.logs[args.PrevLogIndex-1].Term != args.PrevLogTerm {
 		ret = false
 	}
-
+	duplication := -1
 	for idx, v := range args.Entries {
 		newIdx := args.PrevLogIndex + idx
 		DPrintf("newIdx[%d] len[%d]", newIdx, len(rf.logs))
@@ -751,15 +759,19 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 		}
 		if rf.logs[newIdx].Term != v.Term {
 			rf.logs = rf.logs[0:newIdx]
-			args.Entries = args.Entries[newIdx:]
+			args.Entries = args.Entries[idx:]
 			break
-		}
-		if idx == len(args.Entries)-1 {
-			args.Entries = nil
+		} else {
+			duplication = idx
 		}
 	}
 
-	DPrintf("logs[%#v] server[%d] agree[%#v]", rf.logs, rf.me, ret)
+	if duplication != -1 {
+		DPrintf("Duplicate[%d]", duplication)
+		args.Entries = args.Entries[duplication+1:]
+	}
+
+	DPrintf("logs[%#v] entries[%#v] server[%d] agree[%#v]", rf.logs, args.Entries, rf.me, ret)
 	return ret
 }
 
@@ -806,6 +818,7 @@ func (rf *Raft) startElection() {
 
 func (rf *Raft) loopApplyMsg(applyCh chan ApplyMsg) {
 	for !rf.killed() {
+		rf.checkN()
 		time.Sleep(10 * time.Millisecond)
 
 		var appliedMsgs = make([]ApplyMsg, 0)
@@ -829,6 +842,42 @@ func (rf *Raft) loopApplyMsg(applyCh chan ApplyMsg) {
 		for _, msg := range appliedMsgs {
 			applyCh <- msg
 		}
+	}
+}
+
+func (rf *Raft) checkN() {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	if rf.state != Leader {
+		return
+	}
+
+	var i int
+	idx := 0
+
+	if rf.commitIndex == 0 {
+		i = 0
+	} else {
+		i = rf.commitIndex - 1
+	}
+
+	for ; i < len(rf.logs); i++ {
+		cnt := 0
+		for _, v := range rf.matchIndex {
+			if v >= i+1 {
+				cnt++
+			}
+		}
+		if cnt+1 > len(rf.peers)/2 && rf.logs[i].Term == rf.currentTerm {
+			idx = i + 1
+		} else {
+			break
+		}
+	}
+	if idx != 0 {
+		DPrintf("CHeckN commitIdx[%d]", idx)
+		rf.commitIndex = idx
 	}
 }
 
