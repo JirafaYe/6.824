@@ -233,10 +233,13 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	default:
 		lastLogTerm = rf.logs[len(rf.logs)-1].Term
 	}
-	// fmt.Printf("%#v:::rf\n", rf)
-	// //fmt.Println("me:::::Votedfor:::term:::argsTerm::::Can", rf.me, rf.votedFor, rf.currentTerm, args.Term, args.CandidateId)
-	if (rf.votedFor == -1 || rf.votedFor == args.CandidateId) && args.Term >= rf.currentTerm {
-		if args.LastLogIndex >= len(rf.logs) && args.LastLogTerm >= lastLogTerm {
+
+	if rf.votedFor == -1 || rf.votedFor == args.CandidateId {
+		// if args.LastLogIndex >= len(rf.logs) && args.LastLogTerm >= lastLogTerm {
+		// 	flag = true
+		// 	rf.votedFor = args.CandidateId
+		// }
+		if args.Term > lastLogTerm || (args.Term == lastLogTerm && args.LastLogIndex >= len(rf.logs)) {
 			flag = true
 			rf.votedFor = args.CandidateId
 		}
@@ -388,6 +391,7 @@ func (rf *Raft) initializeNextIndex() {
 	for idx := range rf.nextIndex {
 		rf.nextIndex[idx] = len(rf.logs) + 1
 	}
+
 }
 
 func (rf *Raft) quitRpcTimeout(chReplys chan interface{}, chTimeout chan struct{}, mu *sync.Mutex) {
@@ -654,7 +658,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 }
 
 func (rf *Raft) retry(peer int) {
-	for {
+	for rf.GetRfState() == Leader {
 		DPrintf("Retry server[%d]", peer)
 		rply := &AppendEntriesReply{}
 		args := rf.getEntriesArgs(peer)
@@ -666,7 +670,9 @@ func (rf *Raft) retry(peer int) {
 			rf.mu.Unlock()
 			break
 		} else {
-			rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
+			if rf.nextIndex[rply.Me] > 1 {
+				rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
+			}
 			rf.mu.Unlock()
 		}
 		time.Sleep(heartbeat)
