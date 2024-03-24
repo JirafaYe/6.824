@@ -554,12 +554,14 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 	}
 
 	entries := make(map[int]Log)
+	rf.mu.Lock()
 	DPrintf("index:::::[%d]", index)
 	if index == 0 {
 		entries = nil
 	} else {
 		entries[index-1] = rf.logs[index-1]
 	}
+	rf.mu.Unlock()
 
 	// entries[index] = rf.logs[index]
 
@@ -612,7 +614,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 	for reply := range chRplys {
 		rf.mu.Lock()
 		rply := reply.(AppendEntriesReply)
-		DPrintf("server[%d] term[%d] leaderTerm[%d]", rply.Me, rply.Term, rf.me)
+		DPrintf("server[%d] term[%d] leaderTerm[%d]", rply.Me, rply.Term, rf.currentTerm)
 		if rply.Term == rf.currentTerm && rply.Success {
 			rf.nextIndex[rply.Me] = index + 1
 			rf.matchIndex[rply.Me] = index
@@ -629,13 +631,16 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 	DPrintf("commit numbers [%d]", cnt+1)
 
 	if cnt+1 > len(rf.peers)/2 {
-		DPrintf("commit Leader[%d]", rf.me)
+		DPrintf("commit Leader[%d] idx[%d]", rf.me, index)
 
 		rf.mu.Lock()
-		rf.commitIndex = index
+		//抛弃过时的commitIdx更新
+		if index > rf.commitIndex {
+			rf.commitIndex = index
+		}
 		rf.mu.Unlock()
 
-		DPrintf("SenHeartBeat.Leader[%d] after commit", rf.me)
+		// DPrintf("SenHeartBeat.Leader[%d] after commit", rf.me)
 		for idx, _ := range rf.peers {
 			if idx != rf.me {
 				i := idx
@@ -853,16 +858,9 @@ func (rf *Raft) checkN() {
 		return
 	}
 
-	var i int
 	idx := 0
 
-	if rf.commitIndex == 0 {
-		i = 0
-	} else {
-		i = rf.commitIndex - 1
-	}
-
-	for ; i < len(rf.logs); i++ {
+	for i := rf.commitIndex; i < len(rf.logs); i++ {
 		cnt := 0
 		for _, v := range rf.matchIndex {
 			if v >= i+1 {
@@ -875,8 +873,8 @@ func (rf *Raft) checkN() {
 			break
 		}
 	}
-	if idx != 0 {
-		DPrintf("CHeckN commitIdx[%d]", idx)
+	if idx != 0 && idx >= rf.commitIndex {
+		DPrintf("CheckN commitIdx[%d] idx[%d]", rf.commitIndex, idx)
 		rf.commitIndex = idx
 	}
 }
