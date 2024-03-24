@@ -477,7 +477,7 @@ func (rf *Raft) ticker() {
 		if state == Leader {
 			//fmt.Println("isLeader", rf.me, ":::::::::")
 			time.Sleep(heartbeat)
-			rf.mu.Lock()
+			// rf.mu.Lock()
 			// fmt.Println("::::LockTicker")
 			// args := &AppendEntriesArgs{
 			// 	Term:         rf.currentTerm,
@@ -486,7 +486,7 @@ func (rf *Raft) ticker() {
 			// 	LeaderCommit: rf.commitIndex,
 			// 	LastApplied:  rf.lastApplied,
 			// }
-			rf.mu.Unlock()
+			// rf.mu.Unlock()
 			// //fmt.Println("::::UnLockTicker")
 			reply := &AppendEntriesReply{}
 			for idx, _ := range rf.peers {
