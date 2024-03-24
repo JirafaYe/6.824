@@ -389,6 +389,7 @@ func TestRejoin2B(t *testing.T) {
 	cfg.disconnect(leader2)
 
 	// old leader connected again
+	DPrintf("old leader connected again")
 	cfg.connect(leader1)
 
 	cfg.one(104, 2, true)
