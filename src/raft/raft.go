@@ -791,7 +791,8 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 
 	if args.Entries == nil {
 		if args.PrevLogIndex > 0 && args.PrevLogIndex < args.LeaderCommit {
-			rf.logs = rf.logs[0:args.PrevLogIndex]
+			// rf.logs = rf.logs[0:args.PrevLogIndex]
+			args.LeaderCommit = args.PrevLogIndex
 			return ret
 		}
 	}
