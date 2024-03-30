@@ -245,6 +245,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	}
 	reply.Term = rf.currentTerm
 	reply.VoteGranted = flag
+	// rf.votedFor = args.CandidateId
 
 	DPrintf("VoteRaft Term[%d] VotedFor[%d] server[%d]", rf.currentTerm, rf.votedFor, rf.me)
 
@@ -708,7 +709,7 @@ func (rf *Raft) getEntriesArgs(peer int) AppendEntriesArgs {
 	var entry []Log
 	if nextIndex == len(rf.logs)+1 || nextIndex-1 < 0 {
 		entry = nil
-	} else {
+	} else if nextIndex-1 < len(rf.logs) {
 		entry = rf.logs[nextIndex-1 : len(rf.logs)]
 	}
 
@@ -786,6 +787,14 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 		ret = false
 	}
 	duplication := -1
+	flag := false
+
+	if args.Entries == nil {
+		if args.PrevLogIndex > 0 && args.PrevLogIndex < args.LeaderCommit {
+			rf.logs = rf.logs[0:args.PrevLogIndex]
+			return ret
+		}
+	}
 	for idx, v := range args.Entries {
 		newIdx := args.PrevLogIndex + idx
 		DPrintf("newIdx[%d] len[%d]", newIdx, len(rf.logs))
@@ -795,13 +804,14 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 		if rf.logs[newIdx].Term != v.Term {
 			rf.logs = rf.logs[0:newIdx]
 			args.Entries = args.Entries[idx:]
+			flag = true
 			break
 		} else {
 			duplication = idx
 		}
 	}
 
-	if duplication != -1 {
+	if duplication != -1 && !flag {
 		DPrintf("Duplicate[%d]", duplication)
 		args.Entries = args.Entries[duplication+1:]
 	}
@@ -854,7 +864,7 @@ func (rf *Raft) startElection() {
 func (rf *Raft) loopApplyMsg(applyCh chan ApplyMsg) {
 	for !rf.killed() {
 		rf.checkN()
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(15 * time.Millisecond)
 
 		var appliedMsgs = make([]ApplyMsg, 0)
 
