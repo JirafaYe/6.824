@@ -207,9 +207,7 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 
 func (rf *Raft) GetRfState() int {
 	rf.mu.Lock()
-	// //fmt.Println("::::LockElecState")
 	defer rf.mu.Unlock()
-	// //fmt.Println("::::UnLockElecState")
 
 	return rf.state
 }
@@ -232,10 +230,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	}
 
 	if (rf.votedFor == -1 || rf.votedFor == args.CandidateId) && args.Term >= rf.currentTerm {
-		// if args.LastLogIndex >= len(rf.logs) && args.LastLogTerm >= lastLogTerm {
-		// 	flag = true
-		// 	rf.votedFor = args.CandidateId
-		// }
 		if args.LastLogTerm > lastLogTerm || (args.LastLogTerm == lastLogTerm && args.LastLogIndex >= len(rf.logs)) {
 			flag = true
 			rf.votedFor = args.CandidateId
@@ -289,25 +283,10 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 
 var chMu sync.Mutex
 
-// func (rf *Raft) preventRpcTimeout(f func(), reply *any, chRplys chan interface{}, chTimeout chan struct{}) {
-// 	f()
-// 	select {
-// 	case <-chTimeout:
-// 		DPrintf("rpc超时,chan已关闭,me::%d", i)
-// 	default:
-// 		//防止chan在close时被写入造成data race
-// 		chMu.Lock()
-// 		// DPrintf("rpc响应,me::%d", i)
-// 		chRplys <- *reply
-// 		chMu.Unlock()
-// 	}
-// }
-
 func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// rplys := []*RequestVoteReply{}
 	chRplys := make(chan interface{}, len(rf.peers)-1)
 	chTimeout := make(chan struct{}, len(rf.peers))
-	// ctx, cancel := context.WithCancel(context.Background())
 
 	//超时处理
 	go rf.quitRpcTimeout(chRplys, chTimeout, &chMu)
@@ -345,37 +324,23 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		if rply.Term == rf.currentTerm && rply.VoteGranted {
 			rf.votes++
 		} else if rply.Term > rf.currentTerm {
-			// rf.state = Follower
-			// rf.currentTerm--
-			// rf.votedFor = -1
 			rf.transState(Follower, rply.Term)
 			break
 		}
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock1:::::%d::votes::%d", rf.me, rf.votes)
-		// //fmt.Println("::::UnLockVote1")
 	}
 
 	rf.mu.Lock()
 	DPrintf("VoteLock2:::::%d::votes::%d::state::%d", rf.me, rf.votes, rf.state)
-	// //fmt.Println("sendALL::::Candidate::Folower", rf.me)
 	if rf.votes > len(rf.peers)/2 && rf.state == Candidate {
 		rf.transState(Leader, rf.currentTerm)
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 		rf.initializeNextIndex()
-
-		// args := &AppendEntriesArgs{
-		// 	Term:     rf.currentTerm,
-		// 	LeaderId: rf.me,
-		// 	Entries:  nil,
-		// }
 		DPrintf("SenHeartBeat.Leader:%d", rf.me)
 		rf.sendHeartBeat()
 	} else {
-		// rf.state = Follower
-		// rf.currentTerm--
-		// rf.votedFor = -1
 		rf.transState(Follower, rf.currentTerm-1)
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock2:::::%d", rf.me)
@@ -418,8 +383,6 @@ func (rf *Raft) quitRpcTimeout(chReplys chan interface{}, chTimeout chan struct{
 // term. the third return value is true if this server believes it is
 // the leader.
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
-	// index := len(rf.logs)
-
 	term, isLeader := rf.GetState()
 
 	if !isLeader {
@@ -449,6 +412,7 @@ func (rf *Raft) batchAppendEntries() {
 		lenLogs := len(rf.logs)
 		rf.mu.Unlock()
 		if rf.GetRfState() != Leader {
+			time.Sleep(rpcTimeOut)
 			continue
 		}
 		DPrintf("LogLen[%d]", lenLogs)
@@ -473,13 +437,13 @@ func (rf *Raft) sendHeartBeat() {
 		if idx != rf.me {
 			rf.sendAppendEntries(idx, &args, reply)
 
-			// if !reply.Success {
-			// 	rf.mu.Lock()
-			// 	if rf.nextIndex[reply.Me] > 1 {
-			// 		rf.nextIndex[reply.Me] = rf.nextIndex[reply.Me] - 1
-			// 	}
-			// 	rf.mu.Unlock()
-			// }
+			if !reply.Success {
+				rf.mu.Lock()
+				if rf.nextIndex[reply.Me] > 1 {
+					rf.nextIndex[reply.Me] = rf.nextIndex[reply.Me] - 1
+				}
+				rf.mu.Unlock()
+			}
 		}
 	}
 }
@@ -509,8 +473,6 @@ func (rf *Raft) ticker() {
 	for !rf.killed() {
 		// Your code here to check if a leader election should
 		// be started and to randomize sleeping time using
-		// time.Sleep().
-		// //fmt.Println("ticker")
 		state := rf.GetRfState()
 		if state == Leader {
 			time.Sleep(heartbeat)
@@ -518,12 +480,9 @@ func (rf *Raft) ticker() {
 			case <-rf.heartbeatTimerch:
 				DPrintf("heartBeat Timeout")
 			default:
-				//fmt.Println("startElection::", rf.me)
 				rf.sendHeartBeat()
 			}
 		} else {
-			// //fmt.Println("Follower")
-
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
 			randomInt := rand.Intn(250) + 300
