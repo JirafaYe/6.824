@@ -55,7 +55,7 @@ const (
 	Follower   int           = 0
 	Leader     int           = 1
 	Candidate  int           = -1
-	heartbeat  time.Duration = 220 * time.Millisecond
+	heartbeat  time.Duration = 210 * time.Millisecond
 	rpcTimeOut time.Duration = 150 * time.Millisecond
 )
 
@@ -464,7 +464,7 @@ func (rf *Raft) batchAppendEntries() {
 			rf.sendAppendEntriesAll(lenLogs)
 		}
 
-		time.Sleep(heartbeat / 2)
+		time.Sleep(heartbeat)
 	}
 
 }
@@ -531,7 +531,7 @@ func (rf *Raft) ticker() {
 
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(400) + 300
+			randomInt := rand.Intn(300) + 300
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
 
@@ -810,8 +810,12 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 		if args.PrevLogIndex > 0 && args.PrevLogIndex < args.LeaderCommit {
 			// rf.logs = rf.logs[0:args.PrevLogIndex]
 			args.LeaderCommit = args.PrevLogIndex
-			return ret
 		}
+		return ret
+	}
+
+	if !ret {
+		return ret
 	}
 	for idx, v := range args.Entries {
 		newIdx := args.PrevLogIndex + idx
