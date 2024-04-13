@@ -231,7 +231,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		lastLogTerm = rf.logs[len(rf.logs)-1].Term
 	}
 
-	if rf.votedFor == -1 || rf.votedFor == args.CandidateId && args.Term >= rf.currentTerm {
+	if (rf.votedFor == -1 || rf.votedFor == args.CandidateId) && args.Term >= rf.currentTerm {
 		// if args.LastLogIndex >= len(rf.logs) && args.LastLogTerm >= lastLogTerm {
 		// 	flag = true
 		// 	rf.votedFor = args.CandidateId
@@ -556,10 +556,12 @@ func (rf *Raft) stopHeartBeat() {
 
 func (rf *Raft) transState(state int, term int) {
 	DPrintf("TransTo[%d] me[%d] term[%d]", state, rf.me, term)
+	if term != rf.currentTerm {
+		rf.votedFor = -1
+	}
 	switch state {
 	case Follower:
 		rf.state = Follower
-		rf.votedFor = -1
 		rf.currentTerm = term
 	case Candidate:
 		rf.state = Candidate
