@@ -55,7 +55,7 @@ const (
 	Follower   int           = 0
 	Leader     int           = 1
 	Candidate  int           = -1
-	heartbeat  time.Duration = 210 * time.Millisecond
+	heartbeat  time.Duration = 200 * time.Millisecond
 	rpcTimeOut time.Duration = 150 * time.Millisecond
 )
 
@@ -312,8 +312,6 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 	//超时处理
 	go rf.quitRpcTimeout(chRplys, chTimeout, &chMu)
 
-	rf.stopHeartBeat()
-
 	for idx, _ := range rf.peers {
 		if idx == rf.me {
 			continue
@@ -367,19 +365,13 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 		rf.initializeNextIndex()
 
-		args := &AppendEntriesArgs{
-			Term:     rf.currentTerm,
-			LeaderId: rf.me,
-			Entries:  nil,
-		}
+		// args := &AppendEntriesArgs{
+		// 	Term:     rf.currentTerm,
+		// 	LeaderId: rf.me,
+		// 	Entries:  nil,
+		// }
 		DPrintf("SenHeartBeat.Leader:%d", rf.me)
-		for idx, _ := range rf.peers {
-			if idx != rf.me {
-				i := idx
-				reply := &AppendEntriesReply{}
-				go rf.sendAppendEntries(i, args, reply)
-			}
-		}
+		rf.sendHeartBeat()
 	} else {
 		// rf.state = Follower
 		// rf.currentTerm--
@@ -464,7 +456,7 @@ func (rf *Raft) batchAppendEntries() {
 			rf.sendAppendEntriesAll(lenLogs)
 		}
 
-		time.Sleep(heartbeat)
+		time.Sleep(rpcTimeOut)
 	}
 
 }
@@ -472,6 +464,9 @@ func (rf *Raft) batchAppendEntries() {
 func (rf *Raft) sendHeartBeat() {
 	reply := &AppendEntriesReply{}
 	for idx, _ := range rf.peers {
+		if rf.GetRfState() != Leader {
+			break
+		}
 		args := rf.getEntriesArgs(idx)
 		args.Entries = nil
 
@@ -531,7 +526,7 @@ func (rf *Raft) ticker() {
 
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(300) + 300
+			randomInt := rand.Intn(250) + 300
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
 
@@ -561,11 +556,6 @@ func (rf *Raft) stopHeartBeat() {
 
 func (rf *Raft) transState(state int, term int) {
 	DPrintf("TransTo[%d] me[%d] term[%d]", state, rf.me, term)
-	// rf.mu.Lock()
-	// defer rf.mu.Unlock()
-	if term > rf.currentTerm {
-		rf.votedFor = -1
-	}
 	switch state {
 	case Follower:
 		rf.state = Follower
@@ -598,27 +588,9 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 	}
 	rf.mu.Unlock()
 
-	// entries[index] = rf.logs[index]
-
-	// var prevLogIndex = index - 1
-
-	// args := &AppendEntriesArgs{
-	// 	Term:         rf.currentTerm,
-	// 	LeaderId:     rf.me,
-	// 	PrevLogIndex: prevLogIndex,
-	// 	Entries:      entries,
-	// 	LeaderCommit: rf.commitIndex,
-	// }
-	// if prevLogIndex > 0 {
-	// 	args.PrevLogTerm = rf.logs[prevLogIndex-1].Term
-	// }
-
 	chRplys := make(chan interface{}, len(rf.peers)-1)
 	chTimeout := make(chan struct{}, len(rf.peers))
 	go rf.quitRpcTimeout(chRplys, chTimeout, &appendMu)
-
-	//todo:接收返回参数
-	rf.stopHeartBeat()
 
 	for idx, _ := range rf.peers {
 		if idx != rf.me {
