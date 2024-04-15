@@ -21,12 +21,14 @@ import (
 
 	//	"bytes"
 
+	"bytes"
 	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	//	"6.824/labgob"
+	"6.824/labgob"
 	"6.824/labrpc"
 )
 
@@ -55,7 +57,7 @@ const (
 	Follower   int           = 0
 	Leader     int           = 1
 	Candidate  int           = -1
-	heartbeat  time.Duration = 200 * time.Millisecond
+	heartbeat  time.Duration = 50 * time.Millisecond
 	rpcTimeOut time.Duration = 150 * time.Millisecond
 )
 
@@ -159,12 +161,13 @@ func (rf *Raft) GetState() (int, bool) {
 func (rf *Raft) persist() {
 	// Your code here (2C).
 	// Example:
-	// w := new(bytes.Buffer)
-	// e := labgob.NewEncoder(w)
-	// e.Encode(rf.xxx)
-	// e.Encode(rf.yyy)
-	// data := w.Bytes()
-	// rf.persister.SaveRaftState(data)
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	e.Encode(rf.currentTerm)
+	e.Encode(rf.votedFor)
+	e.Encode(rf.logs)
+	data := w.Bytes()
+	rf.persister.SaveRaftState(data)
 }
 
 // restore previously persisted state.
@@ -185,6 +188,23 @@ func (rf *Raft) readPersist(data []byte) {
 	//   rf.xxx = xxx
 	//   rf.yyy = yyy
 	// }
+	r := bytes.NewBuffer(data)
+	d := labgob.NewDecoder(r)
+	var term int
+	var votedFor int
+	var log []Log
+	if d.Decode(&term) != nil || d.Decode(&votedFor) != nil || d.Decode(&log) != nil {
+		DPrintf("Error: raft%d readPersist.", rf.me)
+	} else {
+		rf.mu.Lock()
+		rf.currentTerm = term
+		rf.votedFor = votedFor
+		rf.logs = log
+		var logLength = len(rf.logs)
+		DPrintf("[%v] raft[%d] readPersist, term:[%d], votedFor:[%d], logLength[%d]", time.Now(), rf.me, rf.currentTerm, rf.votedFor, logLength)
+
+		rf.mu.Unlock()
+	}
 }
 
 // A service wants to switch to snapshot.  Only do so if Raft hasn't
@@ -233,15 +253,16 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		if args.LastLogTerm > lastLogTerm || (args.LastLogTerm == lastLogTerm && args.LastLogIndex >= len(rf.logs)) {
 			flag = true
 			rf.votedFor = args.CandidateId
+			rf.resetTimer()
 		}
 	}
 	reply.Term = rf.currentTerm
 	reply.VoteGranted = flag
-	rf.resetTimer()
+	rf.persist()
 
 	// rf.votedFor = args.CandidateId
 
-	DPrintf("VoteRaft Term[%d] VotedFor[%d] server[%d]", rf.currentTerm, rf.votedFor, rf.me)
+	DPrintf("VoteRaft Term[%d] VotedFor[%d] server[%d] LastLogTerm[%d] LogsLength[%d]", rf.currentTerm, rf.votedFor, rf.me, lastLogTerm, len(rf.logs))
 
 	DPrintf("VoteUnLock3:::me:%d::ArgsTerm::%d:%#v", rf.me, args.Term, reply)
 	rf.mu.Unlock()
@@ -406,6 +427,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 }
 
 func (rf *Raft) batchAppendEntries() {
+	prelength := 0
 
 	for !rf.killed() {
 		rf.mu.Lock()
@@ -416,7 +438,8 @@ func (rf *Raft) batchAppendEntries() {
 			continue
 		}
 		DPrintf("LogLen[%d]", lenLogs)
-		if lenLogs > 0 {
+		if lenLogs > prelength {
+			rf.persist()
 			rf.sendAppendEntriesAll(lenLogs)
 		}
 
@@ -485,7 +508,7 @@ func (rf *Raft) ticker() {
 		} else {
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(250) + 300
+			randomInt := rand.Intn(400) + 300
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
 
@@ -503,6 +526,7 @@ func (rf *Raft) ticker() {
 
 func (rf *Raft) resetTimer() {
 	if len(rf.electionTimerch) == 0 {
+		DPrintf("Raft[%d] resetElectionTimer", rf.me)
 		rf.electionTimerch <- struct{}{}
 	}
 }
@@ -517,6 +541,7 @@ func (rf *Raft) transState(state int, term int) {
 	DPrintf("TransTo[%d] me[%d] term[%d]", state, rf.me, term)
 	if term != rf.currentTerm {
 		rf.votedFor = -1
+		rf.persist()
 	}
 	switch state {
 	case Follower:
@@ -527,6 +552,7 @@ func (rf *Raft) transState(state int, term int) {
 		rf.currentTerm = term
 		rf.votedFor = rf.me
 		rf.votes = 1
+		rf.persist()
 	case Leader:
 		rf.state = Leader
 	}
@@ -638,9 +664,9 @@ func (rf *Raft) retry(peer int) {
 	for rf.GetRfState() == Leader {
 		rply := &AppendEntriesReply{}
 		args := rf.getEntriesArgs(peer)
-		DPrintf("Retry server[%d] args[%#v]", peer, args)
 		rf.sendAppendEntries(peer, &args, rply)
 		rf.mu.Lock()
+		DPrintf("Retry Raft[%d] server[%d] args[%#v]", rf.me, peer, args)
 		if rply.Term == rf.currentTerm && rply.Success {
 			rf.nextIndex[rply.Me] = len(rf.logs) + 1
 			rf.matchIndex[rply.Me] = len(rf.logs)
@@ -692,6 +718,10 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
+	if args.Term > rf.currentTerm {
+		rf.transState(Follower, args.Term)
+	}
+
 	DPrintf("LogAppendLock::%d", rf.me)
 	check := rf.checkEntries(args)
 	if !check {
@@ -701,7 +731,7 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 		if args.Entries != nil {
 			rf.logs = append(rf.logs, args.Entries...)
 		}
-		DPrintf("Append Logs[%#v]", rf.logs)
+		DPrintf("Raft[%d] Logs[%#v]", rf.me, rf.logs)
 	}
 	reply.Term = rf.currentTerm
 	reply.Me = rf.me
@@ -714,42 +744,40 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 			} else {
 				return x
 			}
-		}(args.LeaderCommit, len(rf.logs))
+		}(args.LeaderCommit, len(args.Entries)+args.PrevLogIndex)
 	}
-	rf.resetTimer()
-
+	rf.persist()
 }
 
 // todo:修改判斷条件
 func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 	DPrintf("Check Entries::::me::%d::args%#v", rf.me, args)
 
-	ret := true
+	// ret := true
 	if args.Term < rf.currentTerm {
 		return false
 	}
 
-	if args.PrevLogIndex-1 >= len(rf.logs) {
+	rf.resetTimer()
+
+	if args.PrevLogIndex > len(rf.logs) {
 		return false
 	}
 
 	if args.PrevLogIndex > 0 && rf.logs[args.PrevLogIndex-1].Term != args.PrevLogTerm {
-		ret = false
+		return false
 	}
 	duplication := -1
 	flag := false
 
-	if args.Entries == nil {
-		if args.PrevLogIndex > 0 && args.PrevLogIndex < args.LeaderCommit {
-			// rf.logs = rf.logs[0:args.PrevLogIndex]
-			args.LeaderCommit = args.PrevLogIndex
-		}
-		return ret
-	}
+	// if args.Entries == nil {
+	// 	if args.PrevLogIndex > 0 && args.PrevLogIndex < args.LeaderCommit {
+	// 		// rf.logs = rf.logs[0:args.PrevLogIndex]
+	// 		args.LeaderCommit = args.PrevLogIndex
+	// 	}
+	// 	return ret
+	// }
 
-	if !ret {
-		return ret
-	}
 	for idx, v := range args.Entries {
 		newIdx := args.PrevLogIndex + idx
 		DPrintf("newIdx[%d] len[%d]", newIdx, len(rf.logs))
@@ -771,8 +799,8 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs) bool {
 		args.Entries = args.Entries[duplication+1:]
 	}
 
-	DPrintf("logs[%#v] entries[%#v] server[%d] agree[%#v]", rf.logs, args.Entries, rf.me, ret)
-	return ret
+	DPrintf("logs[%#v] entries[%#v] server[%d] agree[true]", rf.logs, args.Entries, rf.me)
+	return true
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
