@@ -4,3 +4,4 @@ api.key
 *-handin.tar.gz
 bin
 pkg
+src/raft/test.txt

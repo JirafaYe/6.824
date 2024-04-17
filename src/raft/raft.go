@@ -58,7 +58,7 @@ const (
 	Leader     int           = 1
 	Candidate  int           = -1
 	heartbeat  time.Duration = 50 * time.Millisecond
-	rpcTimeOut time.Duration = 150 * time.Millisecond
+	rpcTimeOut time.Duration = 200 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -362,7 +362,7 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		DPrintf("SenHeartBeat.Leader:%d", rf.me)
 		rf.sendHeartBeat()
 	} else {
-		rf.transState(Follower, rf.currentTerm-1)
+		rf.transState(Follower, rf.currentTerm)
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 	}
@@ -374,7 +374,7 @@ func (rf *Raft) initializeNextIndex() {
 
 	for idx := range rf.nextIndex {
 		rf.nextIndex[idx] = len(rf.logs) + 1
-		rf.matchIndex[idx] = 0
+		rf.matchIndex[idx] = -1
 	}
 
 }
@@ -451,8 +451,9 @@ func (rf *Raft) batchAppendEntries() {
 func (rf *Raft) sendHeartBeat() {
 	reply := &AppendEntriesReply{}
 	for idx, _ := range rf.peers {
-		if rf.GetRfState() != Leader {
-			break
+		term, isLeader := rf.GetState()
+		if !isLeader {
+			return
 		}
 		args := rf.getEntriesArgs(idx)
 		args.Entries = nil
@@ -460,12 +461,18 @@ func (rf *Raft) sendHeartBeat() {
 		if idx != rf.me {
 			rf.sendAppendEntries(idx, &args, reply)
 
-			if !reply.Success {
+			if reply.Term == term {
 				rf.mu.Lock()
-				if rf.nextIndex[reply.Me] > 1 {
-					rf.nextIndex[reply.Me] = rf.nextIndex[reply.Me] - 1
+				if !reply.Success {
+					if rf.nextIndex[reply.Me] > 1 {
+						rf.nextIndex[reply.Me] = rf.nextIndex[reply.Me] - 1
+					}
+				} else {
+					rf.matchIndex[idx] = args.PrevLogIndex + len(args.Entries)
 				}
 				rf.mu.Unlock()
+			} else if reply.Term > term {
+				rf.transState(Follower, reply.Term)
 			}
 		}
 	}
@@ -508,7 +515,7 @@ func (rf *Raft) ticker() {
 		} else {
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(400) + 300
+			randomInt := rand.Intn(300) + 800
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
 
@@ -539,7 +546,7 @@ func (rf *Raft) stopHeartBeat() {
 
 func (rf *Raft) transState(state int, term int) {
 	DPrintf("TransTo[%d] me[%d] term[%d]", state, rf.me, term)
-	if term != rf.currentTerm {
+	if term > rf.currentTerm {
 		rf.votedFor = -1
 		rf.persist()
 	}
@@ -621,6 +628,9 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			rf.matchIndex[rply.Me] = index
 			DPrintf("Agree server[%d]", rply.Me)
 			cnt++
+		} else if rply.Term > rf.currentTerm {
+			rf.transState(Follower, rply.Term)
+			return
 		} else {
 			if rf.nextIndex[rply.Me] > 1 {
 				rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
@@ -638,7 +648,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 
 		rf.mu.Lock()
 		//抛弃过时的commitIdx更新
-		if index > rf.commitIndex {
+		if index > rf.commitIndex && rf.logs[index-1].Term == rf.currentTerm {
 			rf.commitIndex = index
 		}
 
@@ -672,6 +682,9 @@ func (rf *Raft) retry(peer int) {
 			rf.matchIndex[rply.Me] = len(rf.logs)
 			rf.mu.Unlock()
 			break
+		} else if rply.Term > rf.currentTerm {
+			rf.transState(Follower, rply.Term)
+			return
 		} else {
 			if rf.nextIndex[rply.Me] > 1 {
 				rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
@@ -847,8 +860,8 @@ func (rf *Raft) startElection() {
 
 func (rf *Raft) loopApplyMsg(applyCh chan ApplyMsg) {
 	for !rf.killed() {
-		rf.checkN()
 		time.Sleep(15 * time.Millisecond)
+		rf.checkN()
 
 		var appliedMsgs = make([]ApplyMsg, 0)
 
@@ -856,7 +869,7 @@ func (rf *Raft) loopApplyMsg(applyCh chan ApplyMsg) {
 			rf.mu.Lock()
 			defer rf.mu.Unlock()
 
-			for rf.commitIndex > rf.lastApplied {
+			for rf.commitIndex > rf.lastApplied && rf.logs[rf.commitIndex-1].Term == rf.currentTerm {
 				rf.lastApplied += 1
 				appliedMsgs = append(appliedMsgs, ApplyMsg{
 					CommandValid: true,
