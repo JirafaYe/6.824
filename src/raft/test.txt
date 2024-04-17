@@ -3919,3 +3919,980 @@ labgob warning: Decoding into a non-default variable/field Term may not work
   ... Passed --  22.1  5  266   55735    3
 PASS
 ok  	6.824/raft	22.127s
+Test (2C): Figure 8 ...
+2024/04/17 15:31:08 election timer :: 1029,server:2
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 election timer :: 864,server:3
+2024/04/17 15:31:08 election timer :: 973,server:4
+2024/04/17 15:31:08 election timer :: 962,server:0
+2024/04/17 15:31:08 election timer :: 873,server:1
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[1] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[0] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[0] isLeader[false]
+2024/04/17 15:31:08 ::lock::StartElection3
+2024/04/17 15:31:08 TransTo[-1] me[3] term[1]
+2024/04/17 15:31:08 ::Unlock::StartElection3
+2024/04/17 15:31:08 VoteArgs[&raft.RequestVoteArgs{Term:1, CandidateId:3, LastLogIndex:0, LastLogTerm:0}] server[3]
+2024/04/17 15:31:08 TimeoutBefore:3
+2024/04/17 15:31:08 VoteLock3:::::0
+2024/04/17 15:31:08 TransTo[0] me[0] term[1]
+2024/04/17 15:31:08 VoteLock3:::::4
+2024/04/17 15:31:08 TransTo[0] me[4] term[1]
+2024/04/17 15:31:08 Raft[4] resetElectionTimer
+2024/04/17 15:31:08 VoteRaft Term[1] VotedFor[3] server[4] LastLogTerm[0] LogsLength[0]
+2024/04/17 15:31:08 VoteUnLock3:::me:4::ArgsTerm::1:&raft.RequestVoteReply{Term:1, VoteGranted:true}
+2024/04/17 15:31:08 RPC vote server[4] me[3]
+2024/04/17 15:31:08 rpc响应,me::4
+2024/04/17 15:31:08 VoteLock3:::::1
+2024/04/17 15:31:08 TransTo[0] me[1] term[1]
+2024/04/17 15:31:08 Raft[1] resetElectionTimer
+2024/04/17 15:31:08 VoteRaft Term[1] VotedFor[3] server[1] LastLogTerm[0] LogsLength[0]
+2024/04/17 15:31:08 VoteUnLock3:::me:1::ArgsTerm::1:&raft.RequestVoteReply{Term:1, VoteGranted:true}
+2024/04/17 15:31:08 RPC vote server[1] me[3]
+2024/04/17 15:31:08 rpc响应,me::1
+2024/04/17 15:31:08 VoteLock3:::::2
+2024/04/17 15:31:08 TransTo[0] me[2] term[1]
+2024/04/17 15:31:08 Raft[2] resetElectionTimer
+2024/04/17 15:31:08 VoteRaft Term[1] VotedFor[3] server[2] LastLogTerm[0] LogsLength[0]
+2024/04/17 15:31:08 VoteUnLock3:::me:2::ArgsTerm::1:&raft.RequestVoteReply{Term:1, VoteGranted:true}
+2024/04/17 15:31:08 RPC vote server[2] me[3]
+2024/04/17 15:31:08 rpc响应,me::2
+2024/04/17 15:31:08 Raft[0] resetElectionTimer
+2024/04/17 15:31:08 VoteRaft Term[1] VotedFor[3] server[0] LastLogTerm[0] LogsLength[0]
+2024/04/17 15:31:08 VoteUnLock3:::me:0::ArgsTerm::1:&raft.RequestVoteReply{Term:1, VoteGranted:true}
+2024/04/17 15:31:08 RPC vote server[0] me[3]
+2024/04/17 15:31:08 rpc响应,me::0
+2024/04/17 15:31:08 election timeout
+2024/04/17 15:31:08 election timer :: 915,server:1
+2024/04/17 15:31:08 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:08 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:08 me[3] Term[1] isLeader[false]
+2024/04/17 15:31:08 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:08 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 election timeout
+2024/04/17 15:31:09 election timer :: 850,server:0
+2024/04/17 15:31:09 election timeout
+2024/04/17 15:31:09 election timer :: 933,server:4
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 election timeout
+2024/04/17 15:31:09 election timer :: 1064,server:2
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 close::::0,len::0
+2024/04/17 15:31:09 close::::1,len::1
+2024/04/17 15:31:09 close::::2,len::2
+2024/04/17 15:31:09 close::::3,len::3
+2024/04/17 15:31:09 close::::4,len::4
+2024/04/17 15:31:09 cancel:::::::::me::3
+2024/04/17 15:31:09 Timeoutaft:3,len::4
+2024/04/17 15:31:09 GetVoteRply:::me[3] term[1] rply[raft.RequestVoteReply{Term:1, VoteGranted:true}]
+2024/04/17 15:31:09 VoteUnLock1:::::3::votes::2
+2024/04/17 15:31:09 GetVoteRply:::me[3] term[1] rply[raft.RequestVoteReply{Term:1, VoteGranted:true}]
+2024/04/17 15:31:09 VoteUnLock1:::::3::votes::3
+2024/04/17 15:31:09 GetVoteRply:::me[3] term[1] rply[raft.RequestVoteReply{Term:1, VoteGranted:true}]
+2024/04/17 15:31:09 VoteUnLock1:::::3::votes::4
+2024/04/17 15:31:09 GetVoteRply:::me[3] term[1] rply[raft.RequestVoteReply{Term:1, VoteGranted:true}]
+2024/04/17 15:31:09 VoteUnLock1:::::3::votes::5
+2024/04/17 15:31:09 VoteLock2:::::3::votes::5::state::-1
+2024/04/17 15:31:09 TransTo[1] me[3] term[1]
+2024/04/17 15:31:09 VoteUnLock2:::::3
+2024/04/17 15:31:09 SenHeartBeat.Leader:3
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[1] server[0]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 Raft[0] resetElectionTimer
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[1] server[1]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 Raft[1] resetElectionTimer
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{}]
+labgob warning: Decoding into a non-default variable/field Term may not work
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[1] server[2]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 Raft[2] resetElectionTimer
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[1] server[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[1] server[4]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 Raft[4] resetElectionTimer
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 LeaderServer[3] idx[1] entries[raft.Log{Command:774865899879051148, Term:1}]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[0]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[1]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[2]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[4]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[0]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[1]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[2]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[4]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 LogLen[1]
+2024/04/17 15:31:09 index:::::[1]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[0]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[1]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[2]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[4]
+2024/04/17 15:31:09 TimeoutBefore:3
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}, LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 newIdx[0] len[0]
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}, LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 newIdx[0] len[0]
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 rpc响应,me::2
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}, LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 newIdx[0] len[0]
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 rpc响应,me::1
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 rpc响应,me::4
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}, LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 newIdx[0] len[0]
+2024/04/17 15:31:09 logs[[]raft.Log{}] entries[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 rpc响应,me::0
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[0]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[1]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[2]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[4]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[0]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[1]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[2]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[4]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[0]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[1]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[2]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[4]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[0]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[1]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[2]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[3]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[1] EntryLength[2] server[4]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:0, PrevLogTerm:0, Entries:[]raft.Log(nil), LeaderCommit:0, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 close::::0,len::0
+2024/04/17 15:31:09 close::::1,len::1
+2024/04/17 15:31:09 close::::2,len::2
+2024/04/17 15:31:09 close::::3,len::3
+2024/04/17 15:31:09 close::::4,len::4
+2024/04/17 15:31:09 cancel:::::::::me::3
+2024/04/17 15:31:09 Timeoutaft:3,len::4
+2024/04/17 15:31:09 server[2] term[1] leaderTerm[1]
+2024/04/17 15:31:09 Agree server[2]
+2024/04/17 15:31:09 server[1] term[1] leaderTerm[1]
+2024/04/17 15:31:09 Agree server[1]
+2024/04/17 15:31:09 server[4] term[1] leaderTerm[1]
+2024/04/17 15:31:09 Agree server[4]
+2024/04/17 15:31:09 server[0] term[1] leaderTerm[1]
+2024/04/17 15:31:09 Agree server[0]
+2024/04/17 15:31:09 commit numbers [5]
+2024/04/17 15:31:09 commit Leader[3] idx[1]
+2024/04/17 15:31:09 nextIndex[2] EntryLength[2] server[0]
+2024/04/17 15:31:09 send Commit server[0] args[raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:09 nextIndex[2] EntryLength[2] server[1]
+2024/04/17 15:31:09 send Commit server[1] args[raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:09 nextIndex[2] EntryLength[2] server[2]
+2024/04/17 15:31:09 send Commit server[2] args[raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:09 nextIndex[2] EntryLength[2] server[4]
+2024/04/17 15:31:09 send Commit server[4] args[raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:09 LogAppendLock::4
+2024/04/17 15:31:09 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:09 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[4] me[3]
+2024/04/17 15:31:09 LogAppendLock::0
+2024/04/17 15:31:09 Check Entries::::me::0::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[0] agree[true]
+2024/04/17 15:31:09 Raft[0] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[0] me[3]
+2024/04/17 15:31:09 LogAppendLock::1
+2024/04/17 15:31:09 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:09 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[1] me[3]
+2024/04/17 15:31:09 LogAppendLock::2
+2024/04/17 15:31:09 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:1, LeaderId:3, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:09 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:09 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:09 RPC entries server[2] me[3]
+2024/04/17 15:31:09 RaftNode[0] applyLog, currentTerm[1] lastApplied[1] commitIndex[1] command[774865899879051148]
+2024/04/17 15:31:09 RaftNode[3] applyLog, currentTerm[1] lastApplied[1] commitIndex[1] command[774865899879051148]
+2024/04/17 15:31:09 RaftNode[1] applyLog, currentTerm[1] lastApplied[1] commitIndex[1] command[774865899879051148]
+2024/04/17 15:31:09 RaftNode[2] applyLog, currentTerm[1] lastApplied[1] commitIndex[1] command[774865899879051148]
+2024/04/17 15:31:09 RaftNode[4] applyLog, currentTerm[1] lastApplied[1] commitIndex[1] command[774865899879051148]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 LeaderServer[3] idx[2] entries[raft.Log{Command:4943832513540276616, Term:1}]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 heartBeat Timeout
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[3] Term[1] isLeader[true]
+2024/04/17 15:31:09 nextIndex[2] EntryLength[3] server[0]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:09 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:09 election timeout
+2024/04/17 15:31:09 election timer :: 984,server:1
+2024/04/17 15:31:09 election timeout
+2024/04/17 15:31:09 election timer :: 888,server:0
+2024/04/17 15:31:09 election timeout
+2024/04/17 15:31:09 election timer :: 979,server:4
+2024/04/17 15:31:10 election timeout
+2024/04/17 15:31:10 election timer :: 1088,server:2
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[1] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[1] isLeader[false]
+2024/04/17 15:31:10 ::lock::StartElection0
+2024/04/17 15:31:10 TransTo[-1] me[0] term[2]
+2024/04/17 15:31:10 ::Unlock::StartElection0
+2024/04/17 15:31:10 VoteArgs[&raft.RequestVoteArgs{Term:2, CandidateId:0, LastLogIndex:1, LastLogTerm:1}] server[0]
+2024/04/17 15:31:10 TimeoutBefore:0
+2024/04/17 15:31:10 VoteLock3:::::4
+2024/04/17 15:31:10 TransTo[0] me[4] term[2]
+2024/04/17 15:31:10 Raft[4] resetElectionTimer
+2024/04/17 15:31:10 VoteLock3:::::1
+2024/04/17 15:31:10 TransTo[0] me[1] term[2]
+2024/04/17 15:31:10 Raft[1] resetElectionTimer
+2024/04/17 15:31:10 VoteRaft Term[2] VotedFor[0] server[1] LastLogTerm[1] LogsLength[1]
+2024/04/17 15:31:10 VoteUnLock3:::me:1::ArgsTerm::2:&raft.RequestVoteReply{Term:2, VoteGranted:true}
+2024/04/17 15:31:10 RPC vote server[1] me[0]
+2024/04/17 15:31:10 rpc响应,me::1
+2024/04/17 15:31:10 VoteRaft Term[2] VotedFor[0] server[4] LastLogTerm[1] LogsLength[1]
+2024/04/17 15:31:10 VoteUnLock3:::me:4::ArgsTerm::2:&raft.RequestVoteReply{Term:2, VoteGranted:true}
+2024/04/17 15:31:10 RPC vote server[4] me[0]
+2024/04/17 15:31:10 rpc响应,me::4
+2024/04/17 15:31:10 VoteLock3:::::2
+2024/04/17 15:31:10 TransTo[0] me[2] term[2]
+2024/04/17 15:31:10 Raft[2] resetElectionTimer
+2024/04/17 15:31:10 VoteRaft Term[2] VotedFor[0] server[2] LastLogTerm[1] LogsLength[1]
+2024/04/17 15:31:10 VoteUnLock3:::me:2::ArgsTerm::2:&raft.RequestVoteReply{Term:2, VoteGranted:true}
+2024/04/17 15:31:10 RPC vote server[2] me[0]
+2024/04/17 15:31:10 rpc响应,me::2
+2024/04/17 15:31:10 election timeout
+2024/04/17 15:31:10 election timer :: 804,server:1
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:10 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:10 close::::0,len::0
+2024/04/17 15:31:10 close::::1,len::1
+2024/04/17 15:31:10 close::::2,len::2
+2024/04/17 15:31:10 close::::3,len::3
+2024/04/17 15:31:10 close::::4,len::4
+2024/04/17 15:31:10 cancel:::::::::me::0
+2024/04/17 15:31:10 Timeoutaft:0,len::4
+2024/04/17 15:31:10 GetVoteRply:::me[0] term[2] rply[raft.RequestVoteReply{Term:2, VoteGranted:true}]
+2024/04/17 15:31:10 VoteUnLock1:::::0::votes::2
+2024/04/17 15:31:10 GetVoteRply:::me[0] term[2] rply[raft.RequestVoteReply{Term:2, VoteGranted:true}]
+2024/04/17 15:31:10 VoteUnLock1:::::0::votes::3
+2024/04/17 15:31:10 GetVoteRply:::me[0] term[2] rply[raft.RequestVoteReply{Term:2, VoteGranted:true}]
+2024/04/17 15:31:10 VoteUnLock1:::::0::votes::4
+2024/04/17 15:31:10 VoteLock2:::::0::votes::4::state::-1
+2024/04/17 15:31:10 TransTo[1] me[0] term[2]
+2024/04/17 15:31:10 VoteUnLock2:::::0
+2024/04/17 15:31:10 SenHeartBeat.Leader:0
+2024/04/17 15:31:10 me[0] Term[2] isLeader[true]
+2024/04/17 15:31:10 nextIndex[2] EntryLength[2] server[0]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[true]
+2024/04/17 15:31:10 nextIndex[2] EntryLength[2] server[1]
+2024/04/17 15:31:10 LogAppendLock::1
+2024/04/17 15:31:10 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:10 Raft[1] resetElectionTimer
+2024/04/17 15:31:10 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:10 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:10 RPC entries server[1] me[0]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[true]
+2024/04/17 15:31:10 nextIndex[2] EntryLength[2] server[2]
+2024/04/17 15:31:10 LogAppendLock::2
+2024/04/17 15:31:10 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:10 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:10 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:10 RPC entries server[2] me[0]
+2024/04/17 15:31:10 me[0] Term[2] isLeader[true]
+2024/04/17 15:31:10 nextIndex[2] EntryLength[2] server[3]
+2024/04/17 15:31:10 election timeout
+2024/04/17 15:31:10 election timer :: 881,server:4
+2024/04/17 15:31:11 LogLen[1]
+2024/04/17 15:31:11 index:::::[1]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[1]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[2]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[3]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[4]
+2024/04/17 15:31:11 TimeoutBefore:0
+2024/04/17 15:31:11 LogAppendLock::4
+2024/04/17 15:31:11 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:11 Raft[4] resetElectionTimer
+2024/04/17 15:31:11 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:11 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:11 RPC entries server[4] me[0]
+2024/04/17 15:31:11 rpc响应,me::4
+2024/04/17 15:31:11 LogAppendLock::1
+2024/04/17 15:31:11 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:11 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:11 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:11 RPC entries server[1] me[0]
+2024/04/17 15:31:11 rpc响应,me::1
+2024/04/17 15:31:11 LogAppendLock::2
+2024/04/17 15:31:11 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:11 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:11 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:11 RPC entries server[2] me[0]
+2024/04/17 15:31:11 rpc响应,me::2
+2024/04/17 15:31:11 election timeout
+2024/04/17 15:31:11 election timer :: 930,server:2
+2024/04/17 15:31:11 close::::0,len::0
+2024/04/17 15:31:11 close::::1,len::1
+2024/04/17 15:31:11 close::::2,len::2
+2024/04/17 15:31:11 close::::3,len::3
+2024/04/17 15:31:11 close::::4,len::4
+2024/04/17 15:31:11 cancel:::::::::me::0
+2024/04/17 15:31:11 Timeoutaft:0,len::4
+2024/04/17 15:31:11 server[4] term[2] leaderTerm[2]
+2024/04/17 15:31:11 Agree server[4]
+2024/04/17 15:31:11 server[1] term[2] leaderTerm[2]
+2024/04/17 15:31:11 Agree server[1]
+2024/04/17 15:31:11 server[2] term[2] leaderTerm[2]
+2024/04/17 15:31:11 Agree server[2]
+2024/04/17 15:31:11 commit numbers [4]
+2024/04/17 15:31:11 commit Leader[0] idx[1]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[1]
+2024/04/17 15:31:11 send Commit server[1] args[raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[2]
+2024/04/17 15:31:11 send Commit server[2] args[raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[3]
+2024/04/17 15:31:11 send Commit server[3] args[raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:11 nextIndex[2] EntryLength[2] server[4]
+2024/04/17 15:31:11 send Commit server[4] args[raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}]
+2024/04/17 15:31:11 LogAppendLock::4
+2024/04/17 15:31:11 Check Entries::::me::4::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:11 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[4] agree[true]
+2024/04/17 15:31:11 Raft[4] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:11 RPC entries server[4] me[0]
+2024/04/17 15:31:11 LogAppendLock::1
+2024/04/17 15:31:11 Check Entries::::me::1::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:11 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[1] agree[true]
+2024/04/17 15:31:11 Raft[1] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:11 RPC entries server[1] me[0]
+2024/04/17 15:31:11 LogAppendLock::2
+2024/04/17 15:31:11 Check Entries::::me::2::args&raft.AppendEntriesArgs{Term:2, LeaderId:0, PrevLogIndex:1, PrevLogTerm:1, Entries:[]raft.Log(nil), LeaderCommit:1, LastApplied:0}
+2024/04/17 15:31:11 Raft[2] resetElectionTimer
+2024/04/17 15:31:11 logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}] entries[[]raft.Log(nil)] server[2] agree[true]
+2024/04/17 15:31:11 Raft[2] Logs[[]raft.Log{raft.Log{Command:774865899879051148, Term:1}}]
+2024/04/17 15:31:11 RPC entries server[2] me[0]
+2024/04/17 15:31:11 me[0] Term[2] isLeader[true]
+2024/04/17 15:31:11 LeaderServer[0] idx[2] entries[raft.Log{Command:5168488988234872288, Term:2}]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 election timeout
+2024/04/17 15:31:11 election timer :: 1011,server:1
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:11 election timeout
+2024/04/17 15:31:11 election timer :: 983,server:4
+2024/04/17 15:31:11 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:11 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 election timeout
+2024/04/17 15:31:12 election timer :: 817,server:2
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[1] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[2] Term[2] isLeader[false]
+2024/04/17 15:31:12 me[4] Term[2] isLeader[false]
+signal: interrupt
+FAIL	6.824/raft	4.582s

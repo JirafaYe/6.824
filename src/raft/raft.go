@@ -346,7 +346,8 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 			rf.votes++
 		} else if rply.Term > rf.currentTerm {
 			rf.transState(Follower, rply.Term)
-			break
+			rf.mu.Unlock()
+			return
 		}
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock1:::::%d::votes::%d", rf.me, rf.votes)
@@ -439,6 +440,7 @@ func (rf *Raft) batchAppendEntries() {
 		}
 		DPrintf("LogLen[%d]", lenLogs)
 		if lenLogs > prelength {
+			prelength = lenLogs
 			rf.persist()
 			rf.sendAppendEntriesAll(lenLogs)
 		}
@@ -460,7 +462,6 @@ func (rf *Raft) sendHeartBeat() {
 
 		if idx != rf.me {
 			rf.sendAppendEntries(idx, &args, reply)
-
 			if reply.Term == term {
 				rf.mu.Lock()
 				if !reply.Success {
@@ -472,7 +473,10 @@ func (rf *Raft) sendHeartBeat() {
 				}
 				rf.mu.Unlock()
 			} else if reply.Term > term {
+				rf.mu.Lock()
 				rf.transState(Follower, reply.Term)
+				rf.mu.Unlock()
+				return
 			}
 		}
 	}
@@ -515,7 +519,7 @@ func (rf *Raft) ticker() {
 		} else {
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(300) + 800
+			randomInt := rand.Intn(300) + 400
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt) * time.Millisecond)
 
@@ -630,6 +634,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			cnt++
 		} else if rply.Term > rf.currentTerm {
 			rf.transState(Follower, rply.Term)
+			rf.mu.Unlock()
 			return
 		} else {
 			if rf.nextIndex[rply.Me] > 1 {
@@ -679,11 +684,12 @@ func (rf *Raft) retry(peer int) {
 		DPrintf("Retry Raft[%d] server[%d] args[%#v]", rf.me, peer, args)
 		if rply.Term == rf.currentTerm && rply.Success {
 			rf.nextIndex[rply.Me] = len(rf.logs) + 1
-			rf.matchIndex[rply.Me] = len(rf.logs)
+			rf.matchIndex[rply.Me] = len(args.Entries) + args.PrevLogIndex
 			rf.mu.Unlock()
 			break
 		} else if rply.Term > rf.currentTerm {
 			rf.transState(Follower, rply.Term)
+			rf.mu.Unlock()
 			return
 		} else {
 			if rf.nextIndex[rply.Me] > 1 {
@@ -736,6 +742,10 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 	}
 
 	DPrintf("LogAppendLock::%d", rf.me)
+
+	entriesLen := len(args.Entries)
+	prevLogIndex := args.PrevLogIndex
+
 	check := rf.checkEntries(args)
 	if !check {
 		reply.Success = false
@@ -757,7 +767,7 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 			} else {
 				return x
 			}
-		}(args.LeaderCommit, len(args.Entries)+args.PrevLogIndex)
+		}(args.LeaderCommit, entriesLen+prevLogIndex)
 	}
 	rf.persist()
 }
@@ -860,7 +870,7 @@ func (rf *Raft) startElection() {
 
 func (rf *Raft) loopApplyMsg(applyCh chan ApplyMsg) {
 	for !rf.killed() {
-		time.Sleep(15 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
 		rf.checkN()
 
 		var appliedMsgs = make([]ApplyMsg, 0)
