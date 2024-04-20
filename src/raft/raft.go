@@ -441,7 +441,9 @@ func (rf *Raft) batchAppendEntries() {
 		DPrintf("LogLen[%d]", lenLogs)
 		if lenLogs > prelength {
 			prelength = lenLogs
+			rf.mu.Lock()
 			rf.persist()
+			rf.mu.Unlock()
 			rf.sendAppendEntriesAll(lenLogs)
 		}
 
@@ -879,7 +881,8 @@ func (rf *Raft) loopApplyMsg(applyCh chan ApplyMsg) {
 			rf.mu.Lock()
 			defer rf.mu.Unlock()
 
-			for rf.commitIndex > rf.lastApplied && rf.logs[rf.commitIndex-1].Term == rf.currentTerm {
+			//此处不可加term判断，应服从Leader指令
+			for rf.commitIndex > rf.lastApplied {
 				rf.lastApplied += 1
 				appliedMsgs = append(appliedMsgs, ApplyMsg{
 					CommandValid: true,
