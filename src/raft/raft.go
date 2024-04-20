@@ -54,11 +54,13 @@ type ApplyMsg struct {
 }
 
 const (
-	Follower   int           = 0
-	Leader     int           = 1
-	Candidate  int           = -1
-	heartbeat  time.Duration = 50 * time.Millisecond
-	rpcTimeOut time.Duration = 200 * time.Millisecond
+	Follower            int           = 0
+	Leader              int           = 1
+	Candidate           int           = -1
+	ElectionRandomRange int           = 150
+	HeartbeatTimeout    time.Duration = 50 * time.Millisecond
+	rpcTimeOut          time.Duration = 200 * time.Millisecond
+	ElectionTimeout     time.Duration = 150 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -76,13 +78,13 @@ type Raft struct {
 	nextIndex  []int
 	matchIndex []int
 
-	currentTerm      int
-	votedFor         int //当前任期内收到选票的 candidateId，如果没有投给任何候选人 则为空
-	logs             []Log
-	state            int
-	electionTimerch  chan struct{}
-	heartbeatTimerch chan struct{}
-	votes            int
+	currentTerm             int
+	votedFor                int //当前任期内收到选票的 candidateId，如果没有投给任何候选人 则为空
+	logs                    []Log
+	state                   int
+	electionTimerch         chan struct{}
+	HeartbeatTimeoutTimerch chan struct{}
+	votes                   int
 
 	// Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
@@ -118,7 +120,7 @@ type AppendEntriesArgs struct {
 	LeaderId     int
 	PrevLogIndex int
 	PrevLogTerm  int
-	//log entries to store,empty for heartbeat
+	//log entries to store,empty for HeartbeatTimeout
 	Entries []Log
 	//leader's commit idx
 	// LeaderCommit int
@@ -360,8 +362,8 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		rf.mu.Unlock()
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 		rf.initializeNextIndex()
-		DPrintf("SenHeartBeat.Leader:%d", rf.me)
-		rf.sendHeartBeat()
+		DPrintf("SenHeartBeatTimeout.Leader:%d", rf.me)
+		rf.sendHeartBeatTimeout()
 	} else {
 		rf.transState(Follower, rf.currentTerm)
 		rf.mu.Unlock()
@@ -452,7 +454,7 @@ func (rf *Raft) batchAppendEntries() {
 
 }
 
-func (rf *Raft) sendHeartBeat() {
+func (rf *Raft) sendHeartBeatTimeout() {
 	reply := &AppendEntriesReply{}
 	for idx, _ := range rf.peers {
 		term, isLeader := rf.GetState()
@@ -511,19 +513,19 @@ func (rf *Raft) ticker() {
 		// be started and to randomize sleeping time using
 		state := rf.GetRfState()
 		if state == Leader {
-			time.Sleep(heartbeat)
+			time.Sleep(HeartbeatTimeout)
 			select {
-			case <-rf.heartbeatTimerch:
-				DPrintf("heartBeat Timeout")
+			case <-rf.HeartbeatTimeoutTimerch:
+				DPrintf("HeartBeatTimeout Timeout")
 			default:
-				rf.sendHeartBeat()
+				rf.sendHeartBeatTimeout()
 			}
 		} else {
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
 			rand.Seed(time.Now().UnixNano())
-			randomInt := rand.Intn(300) + 400
+			randomInt := rand.Intn(ElectionRandomRange)
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
-			time.Sleep(time.Duration(randomInt) * time.Millisecond)
+			time.Sleep(time.Duration(randomInt)*time.Millisecond + ElectionTimeout)
 
 			select {
 			case <-rf.electionTimerch:
@@ -544,9 +546,9 @@ func (rf *Raft) resetTimer() {
 	}
 }
 
-func (rf *Raft) stopHeartBeat() {
-	if len(rf.heartbeatTimerch) == 0 {
-		rf.heartbeatTimerch <- struct{}{}
+func (rf *Raft) stopHeartBeatTimeout() {
+	if len(rf.HeartbeatTimeoutTimerch) == 0 {
+		rf.HeartbeatTimeoutTimerch <- struct{}{}
 	}
 }
 
@@ -661,7 +663,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 
 		rf.mu.Unlock()
 
-		rf.stopHeartBeat()
+		rf.stopHeartBeatTimeout()
 
 		for idx, _ := range rf.peers {
 			if idx != rf.me {
@@ -699,7 +701,7 @@ func (rf *Raft) retry(peer int) {
 			}
 			rf.mu.Unlock()
 		}
-		time.Sleep(heartbeat)
+		time.Sleep(HeartbeatTimeout)
 	}
 }
 
@@ -941,18 +943,18 @@ func (rf *Raft) checkN() {
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := &Raft{
-		dead:             0,
-		logs:             make([]Log, 0),
-		votedFor:         -1,
-		state:            Follower,
-		electionTimerch:  make(chan struct{}, 1),
-		heartbeatTimerch: make(chan struct{}, 1),
-		currentTerm:      0,
-		votes:            0,
-		commitIndex:      0,
-		lastApplied:      0,
-		nextIndex:        make([]int, len(peers)),
-		matchIndex:       make([]int, len(peers)),
+		dead:                    0,
+		logs:                    make([]Log, 0),
+		votedFor:                -1,
+		state:                   Follower,
+		electionTimerch:         make(chan struct{}, 1),
+		HeartbeatTimeoutTimerch: make(chan struct{}, 1),
+		currentTerm:             0,
+		votes:                   0,
+		commitIndex:             0,
+		lastApplied:             0,
+		nextIndex:               make([]int, len(peers)),
+		matchIndex:              make([]int, len(peers)),
 	}
 	rf.peers = peers
 	rf.persister = persister
