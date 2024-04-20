@@ -60,7 +60,7 @@ const (
 	ElectionRandomRange int           = 150
 	HeartbeatTimeout    time.Duration = 50 * time.Millisecond
 	rpcTimeOut          time.Duration = 150 * time.Millisecond
-	ElectionTimeout     time.Duration = 150 * time.Millisecond
+	ElectionTimeout     time.Duration = 200 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -538,7 +538,6 @@ func (rf *Raft) ticker() {
 			}
 		} else {
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
-			rand.Seed(time.Now().UnixNano())
 			randomInt := rand.Intn(ElectionRandomRange)
 			DPrintf("election timer :: %d,server:%d", randomInt, rf.me)
 			time.Sleep(time.Duration(randomInt)*time.Millisecond + ElectionTimeout)
@@ -563,12 +562,6 @@ func (rf *Raft) resetTimer() {
 	}
 }
 
-func (rf *Raft) stopHeartBeatTimeout() {
-	if len(rf.HeartbeatTimeoutTimerch) == 0 {
-		rf.HeartbeatTimeoutTimerch <- struct{}{}
-	}
-}
-
 func (rf *Raft) transState(state int, term int) {
 	DPrintf("TransTo[%d] me[%d] term[%d]", state, rf.me, term)
 	if term > rf.currentTerm {
@@ -587,6 +580,7 @@ func (rf *Raft) transState(state int, term int) {
 		rf.persist()
 	case Leader:
 		rf.state = Leader
+		rf.Start(nil)
 	}
 }
 
@@ -681,7 +675,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 
 		rf.mu.Unlock()
 
-		rf.stopHeartBeatTimeout()
+		// rf.stopHeartBeatTimeout()
 
 		for idx, _ := range rf.peers {
 			if idx != rf.me {
@@ -714,9 +708,6 @@ func (rf *Raft) retry(peer int) {
 			rf.mu.Unlock()
 			return
 		} else {
-			// if rf.nextIndex[rply.Me] > 1 {
-			// 	rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
-			// }
 			rf.handleConflitReply(rply)
 			rf.mu.Unlock()
 		}
