@@ -59,7 +59,7 @@ const (
 	Candidate           int           = -1
 	ElectionRandomRange int           = 300
 	HeartbeatTimeout    time.Duration = 50 * time.Millisecond
-	rpcTimeOut          time.Duration = 110 * time.Millisecond
+	rpcTimeOut          time.Duration = 70 * time.Millisecond
 	ElectionTimeout     time.Duration = 250 * time.Millisecond
 )
 
