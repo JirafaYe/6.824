@@ -57,10 +57,10 @@ const (
 	Follower            int           = 0
 	Leader              int           = 1
 	Candidate           int           = -1
-	ElectionRandomRange int           = 150
+	ElectionRandomRange int           = 300
 	HeartbeatTimeout    time.Duration = 50 * time.Millisecond
-	rpcTimeOut          time.Duration = 150 * time.Millisecond
-	ElectionTimeout     time.Duration = 150 * time.Millisecond
+	rpcTimeOut          time.Duration = 110 * time.Millisecond
+	ElectionTimeout     time.Duration = 250 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -365,7 +365,7 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 		rf.initializeNextIndex()
 		DPrintf("SenHeartBeatTimeout.Leader:%d", rf.me)
-		rf.sendHeartBeatTimeout()
+		go rf.sendHeartBeatTimeout()
 	} else {
 		rf.transState(Follower, rf.currentTerm)
 		rf.mu.Unlock()
@@ -432,7 +432,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 }
 
 func (rf *Raft) batchAppendEntries() {
-	prelength := 0
+	// prelength := 0
 
 	for !rf.killed() {
 		rf.mu.Lock()
@@ -443,15 +443,15 @@ func (rf *Raft) batchAppendEntries() {
 			continue
 		}
 		DPrintf("LogLen[%d]", lenLogs)
-		if lenLogs > prelength {
-			prelength = lenLogs
+		if lenLogs > 0 {
+			// prelength = lenLogs
 			rf.mu.Lock()
 			rf.persist()
 			rf.mu.Unlock()
 			rf.sendAppendEntriesAll(lenLogs)
 		}
 
-		time.Sleep(rpcTimeOut)
+		time.Sleep(rpcTimeOut / 2)
 	}
 
 }
@@ -473,7 +473,10 @@ func (rf *Raft) sendHeartBeatTimeout() {
 				if !reply.Success {
 					rf.handleConflitReply(reply)
 				} else {
-					rf.matchIndex[idx] = args.PrevLogIndex + len(args.Entries)
+					match := len(args.Entries) + args.PrevLogIndex
+					next := match + 1
+					rf.nextIndex[idx] = max(rf.nextIndex[idx], next)
+					rf.matchIndex[idx] = max(rf.matchIndex[idx], match)
 				}
 				rf.mu.Unlock()
 			} else if reply.Term > term {
@@ -488,18 +491,23 @@ func (rf *Raft) sendHeartBeatTimeout() {
 
 func (rf *Raft) handleConflitReply(reply *AppendEntriesReply) {
 	last := 0
+	if rf.currentTerm != reply.Term || reply.ConflictTerm == 0 {
+		return
+	}
+
 	if rf.nextIndex[reply.Me] <= 1 {
 		return
 	}
 	if reply.ConflictTerm != -1 {
 		last = rf.searchMatchIndexByTerm(reply.ConflictTerm, len(rf.logs), false)
 		if last != 0 {
-			rf.nextIndex[reply.Me] = last - 1
+			rf.nextIndex[reply.Me] = last
 		}
 	}
 	if last == 0 {
 		rf.nextIndex[reply.Me] = reply.ConflictIndex
 	}
+	DPrintf("fast reTrack reply[%#v] nextIndex[%d]", reply, rf.nextIndex[reply.Me])
 }
 
 // the tester doesn't halt goroutines created by Raft after each test,
@@ -535,6 +543,7 @@ func (rf *Raft) ticker() {
 				DPrintf("HeartBeatTimeout Timeout")
 			default:
 				rf.sendHeartBeatTimeout()
+				// rf.sendAppendEntriesAll(0)
 			}
 		} else {
 			//随机定时器，时间范围为400-600ms，心跳间隔为200ms
@@ -642,6 +651,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 	for reply := range chRplys {
 		rf.mu.Lock()
 		rply := reply.(AppendEntriesReply)
+
 		DPrintf("server[%d] term[%d] leaderTerm[%d]", rply.Me, rply.Term, rf.currentTerm)
 		if rply.Term > rf.currentTerm {
 			rf.transState(Follower, rply.Term)
@@ -649,8 +659,10 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			return
 		}
 		if rply.Term == rf.currentTerm && rply.Success {
-			rf.nextIndex[rply.Me] = index + 1
-			rf.matchIndex[rply.Me] = index
+			match := index
+			next := index + 1
+			rf.nextIndex[rply.Me] = max(rf.nextIndex[rply.Me], next)
+			rf.matchIndex[rply.Me] = max(rf.matchIndex[rply.Me], match)
 			DPrintf("Agree server[%d]", rply.Me)
 			cnt++
 		} else if rply.Term > rf.currentTerm {
@@ -670,7 +682,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 	//commit log
 	DPrintf("commit numbers [%d]", cnt+1)
 
-	if cnt+1 > len(rf.peers)/2 {
+	if cnt+1 > len(rf.peers)/2 && index > 0 {
 		DPrintf("commit Leader[%d] idx[%d]", rf.me, index)
 
 		rf.mu.Lock()
@@ -683,15 +695,16 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 
 		rf.stopHeartBeatTimeout()
 
-		for idx, _ := range rf.peers {
-			if idx != rf.me {
-				i := idx
-				reply := &AppendEntriesReply{}
-				args := rf.getEntriesArgs(i)
-				DPrintf("send Commit server[%d] args[%#v]", idx, args)
-				go rf.sendAppendEntries(i, &args, reply)
-			}
-		}
+		// for idx, _ := range rf.peers {
+		// 	if idx != rf.me {
+		// 		i := idx
+		// 		reply := &AppendEntriesReply{}
+		// 		args := rf.getEntriesArgs(i)
+		// 		DPrintf("send Commit server[%d] args[%#v]", idx, args)
+		// 		go rf.sendAppendEntries(i, &args, reply)
+		// 	}
+		// }
+		go rf.sendHeartBeatTimeout()
 
 	}
 
@@ -705,8 +718,10 @@ func (rf *Raft) retry(peer int) {
 		rf.mu.Lock()
 		DPrintf("Retry Raft[%d] server[%d] args[%#v]", rf.me, peer, args)
 		if rply.Term == rf.currentTerm && rply.Success {
-			rf.nextIndex[rply.Me] = len(rf.logs) + 1
-			rf.matchIndex[rply.Me] = len(args.Entries) + args.PrevLogIndex
+			match := len(args.Entries) + args.PrevLogIndex
+			next := match + 1
+			rf.nextIndex[rply.Me] = max(rf.nextIndex[rply.Me], next)
+			rf.matchIndex[rply.Me] = max(rf.matchIndex[rply.Me], match)
 			rf.mu.Unlock()
 			break
 		} else if rply.Term > rf.currentTerm {
@@ -724,6 +739,14 @@ func (rf *Raft) retry(peer int) {
 	}
 }
 
+func max(a int, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
 func (rf *Raft) getEntriesArgs(peer int) AppendEntriesArgs {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
@@ -732,10 +755,12 @@ func (rf *Raft) getEntriesArgs(peer int) AppendEntriesArgs {
 	var prevLogIndex = nextIndex - 1
 
 	var entry []Log
-	if nextIndex == len(rf.logs)+1 || nextIndex-1 < 0 {
+	if nextIndex-1 == len(rf.logs) {
 		entry = nil
 	} else if nextIndex-1 < len(rf.logs) {
 		entry = rf.logs[nextIndex-1 : len(rf.logs)]
+	} else if nextIndex-1 < 0 {
+		entry = rf.logs
 	}
 
 	DPrintf("nextIndex[%d] EntryLength[%d] server[%d]", nextIndex, len(rf.logs)+1, peer)
@@ -797,7 +822,7 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 
 // todo:修改判斷条件
 func (rf *Raft) checkEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
-	DPrintf("Check Entries::::me::%d::args%#v", rf.me, args)
+	DPrintf("logs[%#v] prevIndex[%d] prevTerm[%d] server[%d]", rf.logs, args.PrevLogIndex, args.Term, rf.me)
 
 	// ret := true
 	if args.Term < rf.currentTerm {
@@ -807,7 +832,7 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs, reply *AppendEntriesReply)
 	rf.resetTimer()
 
 	if args.PrevLogIndex > len(rf.logs) {
-		reply.ConflictIndex = len(rf.logs)
+		reply.ConflictIndex = len(rf.logs) + 1
 		reply.ConflictTerm = -1
 		return false
 	}
@@ -849,25 +874,37 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs, reply *AppendEntriesReply)
 		args.Entries = args.Entries[duplication+1:]
 	}
 
-	DPrintf("logs[%#v] entries[%#v] server[%d] agree[true]", rf.logs, args.Entries, rf.me)
 	return true
 }
 
 func (rf *Raft) searchMatchIndexByTerm(term int, index int, isFirst bool) int {
 	val := 0
-	for i := index; i > 0; i-- {
+	var i int
+	for i = index; i > 1; i-- {
+		// if isFirst {
+		if rf.logs[i-1].Term == term && rf.logs[i-2].Term < term {
+			if isFirst {
+				val = i
+			} else {
+				val = i - 1
+			}
+
+			break
+		}
+		// } else {
+		// 	if rf.logs[i-1].Term == term {
+		// 		val = i + 1
+		// 		break
+		// 	}
+	}
+	if i == 1 && rf.logs[i-1].Term == term {
 		if isFirst {
-			if rf.logs[i-1].Term != term {
-				val = i + 1
-				break
-			}
+			val = i
 		} else {
-			if rf.logs[i-1].Term == term {
-				val = i + 1
-				break
-			}
+			val = i - 1
 		}
 	}
+	// }
 	DPrintf("Raft[%d] state[%d] val[%d]", rf.me, rf.state, val)
 	return val
 }
