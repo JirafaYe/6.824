@@ -156,6 +156,24 @@ type InstallSnapshotReply struct {
 	Term int
 }
 
+func (rf *Raft) getLogEntryByIndex(index int) (Log, int) {
+	switch rf.lastIncludedIndex {
+	case 0:
+		if index <= len(rf.logs) {
+			return rf.logs[index-1], index - 1
+		} else {
+			return Log{}, -1
+		}
+	default:
+		if index <= len(rf.logs)+rf.lastIncludedIndex {
+			return rf.logs[index-rf.lastIncludedIndex-1], index - rf.lastIncludedIndex - 1
+		} else {
+			return Log{}, -1
+		}
+	}
+
+}
+
 // return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
@@ -969,11 +987,25 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 			rf.transState(Follower, args.Term)
 		}
 
-		reply.Term = rf.currentTerm
-
 		if args.Term < rf.currentTerm || args.LastIncludedIndex <= rf.lastIncludedIndex {
 			return false
 		}
+
+		rf.lastIncludedIndex = args.LastIncludedIndex
+		rf.lastIncludedTerm = args.LastIncludedTerm
+		reply.Term = rf.currentTerm
+
+		log, idx := rf.getLogEntryByIndex(args.LastIncludedIndex)
+		if idx != -1 && log.Term == args.LastIncludedTerm {
+			if idx+1 < len(rf.logs) {
+				temp := rf.logs[idx+1:]
+				copy(rf.logs, temp)
+
+			}
+			return false
+		}
+
+		rf.logs = make([]Log, 0)
 
 		return true
 	}()
