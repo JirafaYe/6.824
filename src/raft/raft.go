@@ -732,9 +732,6 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			rf.mu.Unlock()
 			return
 		} else {
-			// if rf.nextIndex[rply.Me] > 1 {
-			// 	rf.nextIndex[rply.Me] = rf.nextIndex[rply.Me] - 1
-			// }
 			rf.handleConflitReply(&rply)
 			go rf.retry(rply.Me)
 		}
@@ -756,16 +753,6 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 		rf.mu.Unlock()
 
 		rf.stopHeartBeatTimeout()
-
-		// for idx, _ := range rf.peers {
-		// 	if idx != rf.me {
-		// 		i := idx
-		// 		reply := &AppendEntriesReply{}
-		// 		args := rf.getEntriesArgs(i)
-		// 		DPrintf("send Commit server[%d] args[%#v]", idx, args)
-		// 		go rf.sendAppendEntries(i, &args, reply)
-		// 	}
-		// }
 		go rf.sendHeartBeatTimeout()
 
 	}
@@ -862,7 +849,9 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 	} else {
 		reply.Success = true
 		if args.Entries != nil {
-			rf.logs = append(rf.logs, args.Entries...)
+			temp := append(rf.logs, args.Entries...)
+			rf.logs = make([]Log, len(temp))
+			copy(rf.logs, temp)
 		}
 		DPrintf("Raft[%d] Logs[%#v]", rf.me, rf.logs)
 	}
@@ -991,8 +980,12 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 			return false
 		}
 
+		defer rf.persist()
+
 		rf.lastIncludedIndex = args.LastIncludedIndex
 		rf.lastIncludedTerm = args.LastIncludedTerm
+		rf.commitIndex = max(args.LastIncludedIndex, rf.commitIndex)
+		rf.lastApplied = max(args.LastIncludedIndex, rf.lastApplied)
 		reply.Term = rf.currentTerm
 
 		log, idx := rf.getLogEntryByIndex(args.LastIncludedIndex)
@@ -1000,7 +993,6 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 			if idx+1 < len(rf.logs) {
 				temp := rf.logs[idx+1:]
 				copy(rf.logs, temp)
-
 			}
 			return false
 		}
