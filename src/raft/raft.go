@@ -678,43 +678,53 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			rf.mu.Lock()
 			nextIndex := rf.nextIndex[idx]
 			lastIndex := rf.lastIncludedIndex
+			DPrintf("peer[%d] next[%d] lastIndex[%d]", idx, nextIndex, lastIndex)
 			rf.mu.Unlock()
 
-			DPrintf("peer[%d] next[%d] lastIndex[%d]", idx, nextIndex, lastIndex)
 			if nextIndex <= lastIndex {
-				go func() {
-					args := &InstallSnapshotArgs{
-						Term:              rf.currentTerm,
-						LeaderId:          rf.me,
-						LastIncludedIndex: rf.lastIncludedIndex,
-						LastIncludedTerm:  rf.lastIncludedTerm,
-						Data:              rf.persister.ReadSnapshot(),
-					}
-					reply := &InstallSnapshotReply{}
-					rf.sendInstallSnapshot(i, args, reply)
+				rf.mu.Lock()
 
+				args := &InstallSnapshotArgs{
+					Term:              rf.currentTerm,
+					LeaderId:          rf.me,
+					LastIncludedIndex: rf.lastIncludedIndex,
+					LastIncludedTerm:  rf.lastIncludedTerm,
+					Data:              rf.persister.ReadSnapshot(),
+				}
+				reply := &InstallSnapshotReply{}
+				rf.mu.Unlock()
+
+				go func() {
+					rf.sendInstallSnapshot(i, args, reply)
+					rf.mu.Lock()
 					if reply.Term > rf.currentTerm {
 						rf.transState(Follower, reply.Term)
+					} else {
+						rf.nextIndex[i] = max(rf.nextIndex[i], rf.lastIncludedIndex+1)
+						rf.matchIndex[i] = max(rf.matchIndex[i], rf.lastIncludedIndex)
 					}
+					rf.mu.Unlock()
+
 				}()
 
-				continue
+			} else {
+				reply := &AppendEntriesReply{}
+				args := rf.getEntriesArgs(i)
+				go func() {
+					rf.sendAppendEntries(i, &args, reply)
+					select {
+					case <-chTimeout:
+						DPrintf("rpc超时,chan已关闭,me::%d", i)
+					default:
+						//防止chan在close时被写入造成data race
+						appendMu.Lock()
+						DPrintf("rpc响应,me::%d", i)
+						chRplys <- *reply
+						appendMu.Unlock()
+					}
+				}()
 			}
-			reply := &AppendEntriesReply{}
-			args := rf.getEntriesArgs(i)
-			go func() {
-				rf.sendAppendEntries(i, &args, reply)
-				select {
-				case <-chTimeout:
-					DPrintf("rpc超时,chan已关闭,me::%d", i)
-				default:
-					//防止chan在close时被写入造成data race
-					appendMu.Lock()
-					DPrintf("rpc响应,me::%d", i)
-					chRplys <- *reply
-					appendMu.Unlock()
-				}
-			}()
+
 		}
 	}
 
@@ -777,9 +787,8 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 func (rf *Raft) retry(peer int) {
 	for rf.GetRfState() == Leader {
 		rf.mu.Lock()
-		nextIndex := rf.nextIndex[peer]
-		rf.mu.Unlock()
-		if nextIndex <= rf.lastIncludedIndex {
+		DPrintf("peer[%d] next[%d] lastIndex[%d]", peer, rf.nextIndex[peer], rf.lastIncludedIndex)
+		if rf.nextIndex[peer] <= rf.lastIncludedIndex {
 
 			args := &InstallSnapshotArgs{
 				Term:              rf.currentTerm,
@@ -793,9 +802,13 @@ func (rf *Raft) retry(peer int) {
 
 			if reply.Term > rf.currentTerm {
 				rf.transState(Follower, reply.Term)
+			} else {
+				rf.nextIndex[peer] = max(rf.nextIndex[peer], rf.lastIncludedIndex+1)
+				rf.matchIndex[peer] = max(rf.matchIndex[peer], rf.lastIncludedIndex)
 			}
 			break
 		}
+		rf.mu.Unlock()
 		rply := &AppendEntriesReply{}
 		args := rf.getEntriesArgs(peer)
 		rf.sendAppendEntries(peer, &args, rply)
