@@ -1041,11 +1041,11 @@ func snapcommon(t *testing.T, name string, disconnect bool, reliable bool, crash
 			cfg.one(rand.Int(), servers-1, true)
 		}
 		// send enough to get a snapshot
-		for i := 0; i < SnapShotInterval+1; i++ {
-			cfg.rafts[sender].Start(rand.Int())
+		for idk := 0; idk < SnapShotInterval+1; idk++ {
+			cfg.rafts[sender].Start((i+1)*100 + idk)
 		}
 		// let applier threads catch up with the Start()'s
-		cfg.one(rand.Int(), servers-1, true)
+		cfg.one(10086, servers-1, true)
 
 		if cfg.LogSize() >= MAXLOGSIZE {
 			cfg.t.Fatalf("Log size too large")
