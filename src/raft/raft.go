@@ -563,7 +563,7 @@ func (rf *Raft) handleConflitReply(reply *AppendEntriesReply) {
 			rf.nextIndex[reply.Me] = last
 		}
 	}
-	if last == rf.lastIncludedIndex {
+	if last == rf.lastIncludedIndex || last == 0 {
 		rf.nextIndex[reply.Me] = reply.ConflictIndex
 	}
 	DPrintf("fast reTrack reply[%#v] nextIndex[%d]", reply, rf.nextIndex[reply.Me])
@@ -1014,7 +1014,7 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 		rf.mu.Lock()
 		defer rf.mu.Unlock()
 
-		DPrintf("InstallSnapshot me[%d]", rf.me)
+		DPrintf("InstallSnapshot me[%d] currentTerm[%d] argsTerm[%d]", rf.me, rf.currentTerm, args.Term)
 
 		if args.Term > rf.currentTerm {
 			rf.transState(Follower, args.Term)
@@ -1022,7 +1022,12 @@ func (rf *Raft) InstallSnapshot(args *InstallSnapshotArgs, reply *InstallSnapsho
 
 		reply.Term = rf.currentTerm
 
-		if args.Term < rf.currentTerm || args.LastIncludedIndex <= rf.lastIncludedIndex {
+		if args.Term < rf.currentTerm {
+			return false
+		}
+
+		rf.resetTimer()
+		if args.LastIncludedIndex <= rf.lastIncludedIndex {
 			return false
 		}
 
@@ -1140,7 +1145,7 @@ func (rf *Raft) checkN() {
 	for i := rf.commitIndex - rf.lastIncludedIndex - 1; i < len(rf.logs) && i >= 0; i++ {
 		cnt := 0
 		for _, v := range rf.matchIndex {
-			if v >= i+1 {
+			if v >= i+1+rf.lastIncludedIndex {
 				cnt++
 			}
 		}
