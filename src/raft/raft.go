@@ -60,7 +60,7 @@ const (
 	ElectionRandomRange int           = 300
 	HeartbeatTimeout    time.Duration = 50 * time.Millisecond
 	rpcTimeOut          time.Duration = 70 * time.Millisecond
-	ElectionTimeout     time.Duration = 250 * time.Millisecond
+	ElectionTimeout     time.Duration = 400 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -157,9 +157,9 @@ type InstallSnapshotReply struct {
 }
 
 func (rf *Raft) getLogEntryByIndex(index int) (int, int) {
-	if index-rf.lastIncludedIndex <= 0 {
+	if index-rf.lastIncludedIndex == 0 {
 		return rf.lastIncludedTerm, rf.lastIncludedIndex
-	} else if index <= len(rf.logs)+rf.lastIncludedIndex {
+	} else if index <= len(rf.logs)+rf.lastIncludedIndex && index > rf.lastIncludedIndex {
 		return rf.logs[index-rf.lastIncludedIndex-1].Term, index - rf.lastIncludedIndex - 1
 	} else {
 		return -1, -1
@@ -296,6 +296,8 @@ func (rf *Raft) GetRfState() int {
 // example RequestVote RPC handler.
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
 	DPrintf("VoteLock3:::::%d", rf.me)
 
 	var flag = false
@@ -323,10 +325,9 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	// rf.votedFor = args.CandidateId
 
-	DPrintf("VoteRaft Term[%d] VotedFor[%d] server[%d] LastLogTerm[%d] LogsLength[%d]", rf.currentTerm, rf.votedFor, rf.me, lastLogTerm, len(rf.logs))
+	DPrintf("VoteRaft Term[%d] VotedFor[%d] server[%d] LastLogTerm[%d] LogsLength[%d]", rf.currentTerm, rf.votedFor, rf.me, lastLogTerm, len(rf.logs)+rf.lastIncludedIndex)
 
 	DPrintf("VoteUnLock3:::me:%d::ArgsTerm::%d:%#v", rf.me, args.Term, reply)
-	rf.mu.Unlock()
 
 }
 
@@ -469,7 +470,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	term, isLeader := rf.GetState()
 
 	if !isLeader {
-		return -1, -1, isLeader
+		return 0, 0, isLeader
 	}
 
 	rf.mu.Lock()
@@ -510,7 +511,7 @@ func (rf *Raft) batchAppendEntries() {
 			rf.sendAppendEntriesAll(lenLogs + lastIndex)
 		}
 
-		time.Sleep(rpcTimeOut / 2)
+		time.Sleep(rpcTimeOut)
 	}
 
 }
@@ -526,6 +527,7 @@ func (rf *Raft) sendHeartBeatTimeout() {
 		args.Entries = nil
 
 		if idx != rf.me {
+			DPrintf("HeartBeat")
 			rf.sendAppendEntries(idx, &args, reply)
 			if reply.Term == term {
 				rf.mu.Lock()
@@ -601,7 +603,7 @@ func (rf *Raft) ticker() {
 			case <-rf.HeartbeatTimeoutTimerch:
 				DPrintf("HeartBeatTimeout Timeout")
 			default:
-				rf.sendHeartBeatTimeout()
+				go rf.sendHeartBeatTimeout()
 				// rf.sendAppendEntriesAll(0)
 			}
 		} else {
@@ -625,8 +627,8 @@ func (rf *Raft) ticker() {
 }
 
 func (rf *Raft) resetTimer() {
+	DPrintf("Raft[%d] resetElectionTimer", rf.me)
 	if len(rf.electionTimerch) == 0 {
-		DPrintf("Raft[%d] resetElectionTimer", rf.me)
 		rf.electionTimerch <- struct{}{}
 	}
 }
@@ -710,7 +712,11 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			} else {
 				reply := &AppendEntriesReply{}
 				args := rf.getEntriesArgs(i)
+				// if args.Entries == nil {
+				// 	continue
+				// }
 				go func() {
+					DPrintf("append entries")
 					rf.sendAppendEntries(i, &args, reply)
 					select {
 					case <-chTimeout:
@@ -785,6 +791,9 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 }
 
 func (rf *Raft) retry(peer int) {
+	if peer == rf.me {
+		return
+	}
 	for rf.GetRfState() == Leader {
 		rf.mu.Lock()
 		DPrintf("peer[%d] next[%d] lastIndex[%d]", peer, rf.nextIndex[peer], rf.lastIncludedIndex)
@@ -811,6 +820,7 @@ func (rf *Raft) retry(peer int) {
 		rf.mu.Unlock()
 		rply := &AppendEntriesReply{}
 		args := rf.getEntriesArgs(peer)
+		DPrintf("retry")
 		rf.sendAppendEntries(peer, &args, rply)
 		rf.mu.Lock()
 		DPrintf("Retry Raft[%d] server[%d] args[%#v]", rf.me, peer, args)
@@ -894,6 +904,7 @@ func (rf *Raft) HandleAppendEntries(args *AppendEntriesArgs, reply *AppendEntrie
 	check := rf.checkEntries(args, reply)
 	if !check {
 		reply.Success = false
+		DPrintf("false reply[%#v] currentTerm[%d]", reply, rf.currentTerm)
 	} else {
 		reply.Success = true
 		if args.Entries != nil {
@@ -998,14 +1009,14 @@ func (rf *Raft) searchMatchIndexByTerm(term int, index int, isFirst bool) int {
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
-	ok := rf.peers[server].Call("Raft.HandleAppendEntries", args, reply)
 	DPrintf("RPC entries server[%d] me[%d]", server, rf.me)
+	ok := rf.peers[server].Call("Raft.HandleAppendEntries", args, reply)
 	return ok
 }
 
 func (rf *Raft) sendInstallSnapshot(server int, args *InstallSnapshotArgs, reply *InstallSnapshotReply) bool {
-	ok := rf.peers[server].Call("Raft.InstallSnapshot", args, reply)
 	DPrintf("send InstallSnapshot server[%d] me[%d]", server, rf.me)
+	ok := rf.peers[server].Call("Raft.InstallSnapshot", args, reply)
 	return ok
 }
 
@@ -1104,7 +1115,7 @@ func (rf *Raft) startElection() {
 
 func (rf *Raft) loopApplyMsg() {
 	for !rf.killed() {
-		time.Sleep(5 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 		rf.checkN()
 
 		var appliedMsgs = make([]ApplyMsg, 0)
