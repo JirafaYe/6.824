@@ -57,10 +57,10 @@ const (
 	Follower            int           = 0
 	Leader              int           = 1
 	Candidate           int           = -1
-	ElectionRandomRange int           = 300
+	ElectionRandomRange int           = 400
 	HeartbeatTimeout    time.Duration = 40 * time.Millisecond
 	rpcTimeOut          time.Duration = 70 * time.Millisecond
-	ElectionTimeout     time.Duration = 400 * time.Millisecond
+	ElectionTimeout     time.Duration = 450 * time.Millisecond
 )
 
 // A Go object implementing a single Raft peer.
@@ -687,7 +687,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			rf.mu.Lock()
 			nextIndex := rf.nextIndex[idx]
 			lastIndex := rf.lastIncludedIndex
-			DPrintf("peer[%d] next[%d] lastIndex[%d]", idx, nextIndex, lastIndex)
+			DPrintf("firstSendpeer[%d] next[%d] lastIndex[%d]", idx, nextIndex, lastIndex)
 			rf.mu.Unlock()
 
 			if nextIndex <= lastIndex {
@@ -700,10 +700,10 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 					LastIncludedTerm:  rf.lastIncludedTerm,
 					Data:              rf.persister.ReadSnapshot(),
 				}
-				reply := &InstallSnapshotReply{}
 				rf.mu.Unlock()
 
 				go func() {
+					reply := &InstallSnapshotReply{}
 					rf.sendInstallSnapshot(i, args, reply)
 					rf.mu.Lock()
 					if reply.Term > rf.currentTerm {
@@ -717,13 +717,14 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 				}()
 
 			} else {
-				reply := &AppendEntriesReply{}
-				args := rf.getEntriesArgs(i)
+
 				// if args.Entries == nil {
 				// 	continue
 				// }
 				go func() {
 					DPrintf("append entries")
+					reply := &AppendEntriesReply{}
+					args := rf.getEntriesArgs(i)
 					rf.sendAppendEntries(i, &args, reply)
 					select {
 					case <-chTimeout:
@@ -802,9 +803,13 @@ func (rf *Raft) retry(peer int) {
 	if peer == rf.me {
 		return
 	}
-	for rf.GetRfState() == Leader {
+	for !rf.killed() {
+		if rf.GetRfState() != Leader {
+			return
+		}
 		rf.mu.Lock()
-		DPrintf("peer[%d] next[%d] lastIndex[%d]", peer, rf.nextIndex[peer], rf.lastIncludedIndex)
+		DPrintf("Retry peer[%d] next[%d] lastIndex[%d]", peer, rf.nextIndex[peer], rf.lastIncludedIndex)
+
 		if rf.nextIndex[peer] <= rf.lastIncludedIndex {
 
 			args := &InstallSnapshotArgs{
@@ -814,15 +819,20 @@ func (rf *Raft) retry(peer int) {
 				LastIncludedTerm:  rf.lastIncludedTerm,
 				Data:              rf.persister.ReadSnapshot(),
 			}
+			rf.mu.Unlock()
+
 			reply := &InstallSnapshotReply{}
 			rf.sendInstallSnapshot(peer, args, reply)
 
+			rf.mu.Lock()
 			if reply.Term > rf.currentTerm {
 				rf.transState(Follower, reply.Term)
 			} else {
 				rf.nextIndex[peer] = max(rf.nextIndex[peer], rf.lastIncludedIndex+1)
 				rf.matchIndex[peer] = max(rf.matchIndex[peer], rf.lastIncludedIndex)
 			}
+			rf.mu.Unlock()
+
 			break
 		}
 		rf.mu.Unlock()
