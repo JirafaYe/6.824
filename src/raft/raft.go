@@ -58,7 +58,7 @@ const (
 	Leader              int           = 1
 	Candidate           int           = -1
 	ElectionRandomRange int           = 300
-	HeartbeatTimeout    time.Duration = 50 * time.Millisecond
+	HeartbeatTimeout    time.Duration = 40 * time.Millisecond
 	rpcTimeOut          time.Duration = 70 * time.Millisecond
 	ElectionTimeout     time.Duration = 400 * time.Millisecond
 )
@@ -407,6 +407,7 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		if rply.Term == rf.currentTerm && rply.VoteGranted {
 			rf.votes++
 		} else if rply.Term > rf.currentTerm {
+			// rf.resetTimer()
 			rf.transState(Follower, rply.Term)
 			rf.mu.Unlock()
 			return
@@ -423,7 +424,8 @@ func (rf *Raft) SendRequestVote(args *RequestVoteArgs, reply *RequestVoteReply) 
 		DPrintf("VoteUnLock2:::::%d", rf.me)
 		rf.initializeNextIndex()
 		DPrintf("SenHeartBeatTimeout.Leader:%d", rf.me)
-		go rf.sendHeartBeatTimeout()
+		// go rf.sendHeartBeatTimeout()
+		rf.sendAppendEntriesAll(0)
 	} else {
 		rf.transState(Follower, rf.currentTerm)
 		rf.mu.Unlock()
@@ -502,16 +504,21 @@ func (rf *Raft) batchAppendEntries() {
 			continue
 		}
 		DPrintf("LogLen[%d]", lenLogs)
-		if lenLogs > 0 {
-			// prelength = lenLogs
-			rf.mu.Lock()
-			rf.persist()
-			lastIndex := rf.lastIncludedIndex
-			rf.mu.Unlock()
-			rf.sendAppendEntriesAll(lenLogs + lastIndex)
-		}
+		// if lenLogs > 0 {
+		// prelength = lenLogs
+		// rf.mu.Lock()
+		// rf.persist()
+		// lastIndex := rf.lastIncludedIndex
+		// rf.mu.Unlock()
+		// rf.sendAppendEntriesAll(lenLogs + lastIndex)
+		// }
+		rf.mu.Lock()
+		rf.persist()
+		lastIndex := rf.lastIncludedIndex
+		rf.mu.Unlock()
+		rf.sendAppendEntriesAll(lenLogs + lastIndex)
 
-		time.Sleep(rpcTimeOut)
+		time.Sleep(HeartbeatTimeout)
 	}
 
 }
@@ -603,7 +610,7 @@ func (rf *Raft) ticker() {
 			case <-rf.HeartbeatTimeoutTimerch:
 				DPrintf("HeartBeatTimeout Timeout")
 			default:
-				go rf.sendHeartBeatTimeout()
+				// go rf.sendHeartBeatTimeout()
 				// rf.sendAppendEntriesAll(0)
 			}
 		} else {
@@ -752,6 +759,7 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 			return
 		}
 		if rply.Term == rf.currentTerm && rply.Success {
+			DPrintf(" agree reply[%#v]", rply)
 			match := index
 			next := index + 1
 			rf.nextIndex[rply.Me] = max(rf.nextIndex[rply.Me], next)
@@ -784,8 +792,8 @@ func (rf *Raft) sendAppendEntriesAll(index int) {
 		rf.mu.Unlock()
 
 		// rf.stopHeartBeatTimeout()
-		go rf.sendHeartBeatTimeout()
-
+		// go rf.sendHeartBeatTimeout()
+		rf.sendAppendEntriesAll(0)
 	}
 
 }
@@ -839,7 +847,7 @@ func (rf *Raft) retry(peer int) {
 			rf.handleConflitReply(rply)
 			rf.mu.Unlock()
 		}
-		time.Sleep(HeartbeatTimeout)
+		time.Sleep(rpcTimeOut)
 	}
 }
 
