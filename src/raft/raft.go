@@ -980,7 +980,7 @@ func (rf *Raft) checkEntries(args *AppendEntriesArgs, reply *AppendEntriesReply)
 		if newIdx >= len(rf.logs)+rf.lastIncludedIndex {
 			break
 		}
-		if rf.logs[newIdx-rf.lastIncludedIndex].Term != v.Term {
+		if newIdx-rf.lastIncludedIndex >= 0 && rf.logs[newIdx-rf.lastIncludedIndex].Term != v.Term {
 			rf.logs = rf.logs[0 : newIdx-rf.lastIncludedIndex]
 			args.Entries = args.Entries[idx:]
 			flag = true
